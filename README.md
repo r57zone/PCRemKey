@@ -4,7 +4,9 @@
 
 # PCRemKey
 
-Remote PC Keyboard for Android and iOS 
+Remote PC Keyboard for Android and iOS.
+
+[![](https://github.com/user-attachments/assets/6543626f-25d9-45ca-8109-09c9e1cd5bc6)](https://github.com/user-attachments/assets/7ac8dec1-d35a-4931-833b-9a8fc1631f42)
 
 ## Features
 The following languages ​​are supported: English, Russian, Chinese (Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
@@ -27,7 +29,7 @@ The following languages ​​are supported: English, Russian, Chinese (Traditio
 
 To enter an IP address on a mobile device, press `CTRL + ALT + BACKSPACE`.
 
-If the Windows keyboard layout differs from the mobile device keyboard, press `ALT + LANG` to switch it without sending a layout change command to Windows.
+If the Windows keyboard layout differs from the mobile device keyboard, press `ALT + LANG` (change layout only on the device)..
 
 The second language is detected automatically; if needed, you can switch it manually by pressing `CTRL + ALT + =`.
 
@@ -39,7 +41,6 @@ Show hint with `CTRL + ALT + -`.
 2. Reserve a static IP address for the computer running the Windows application. This is done in your Wi-Fi router settings under the "DHCP" section.
 3. Extract the program to `C:\Program Files\PCRemKey`.
 4. To enable autorun, add a shortcut to PCRemKey.exe in the Windows startup folder: `%AppData%\Microsoft\Windows\Start Menu\Programs\Startup`.
-5. Allow access from specific IP addresses, enable request-based access, or change the port if needed in the Windows application settings.
 
 ### Android
 Install `PCRemKey.apk`, select automatic IP address search or enter a reserved permanent IP of your computer (more on this below). If your router assigns the following IP addresses: `192.168.0.0/15`, `192.168.0.100/115`, `192.168.1.0/15`, `192.168.1.100/115`, `192.168.2.0/15`, `192.168.3.0/15`, then you can simply enable automatic IP address search, and the application will automatically detect your computer.
@@ -47,9 +48,6 @@ Install `PCRemKey.apk`, select automatic IP address search or enter a reserved p
 ### iOS
 1. Open Safari browser on your mobile device and enter `http://IP:7533/webapp`, where IP is the reserved permanent IP of your computer.
 2. Click the `Share` button → `Add to Home Screen`. A shortcut to PCRemKey will appear on your desktop.
-
-## Screenshots
-
 
 ## Download
 >Versions for Android 7.1+, iOS 9+ and Windows XP+. 
