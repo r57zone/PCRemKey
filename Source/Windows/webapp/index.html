@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="apple-mobile-web-app-title" content="PCRemKey">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon.png">
+<title>PCRemKey</title>
+<style>
+html,body{ margin: 0; padding: 0; }
+body {
+	font-family: Arial, sans-serif;
+	user-select: none;
+	background-color: #1a1a1a;
+}
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+#keyboard {
+	position:fixed;
+	bottom:0;
+    max-width: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+.row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	padding:0;
+	flex: 1 1 auto;
+	height: calc(10vh - 6px);
+	margin: 1px;
+	font-size: 11px;
+	cursor: pointer;
+	border: none;
+	background-color: #333333;
+	color: #f8f8f8;
+	outline: none;
+}
+.button:active{background-color:#0098d2;}
+.button img{max-width:10px; max-height:10px;}
+
+@media (orientation: landscape) {
+	.keyboard{
+		margin-top: 0;
+	}
+    .button {
+        height: calc(20vh - 6px);
+		font-size: 16px;
+		margin: 3px;
+    }
+	.button img{max-width:20px; max-height:20px;}
+}
+</style>
+<script src="layouts.js"></script>
+<script>
+let Server = '';
+
+let ShiftPressed = false;
+let CtrlPressed = false;
+let AltPressed = false;
+let KeyboardDiv;
+let CustomLang = 'en';
+let CurrentLayoutLang = CustomLang;
+let CurrentLayout;
+let CurrentLayoutShift;
+let ButtonsWidthMul = 1;
+
+let IsAndroid = false;
+
+const EnLayout = [
+	['ESC', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'OEM_MINUS', 'OEM_PLUS', 'BACKSPACE'],
+	['TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'OEM_4', 'OEM_6', 'OEM_5'],
+	['CAPSLOCK', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'OEM_1', 'OEM_7', 'ENTER'],
+	['SHIFT', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'OEM_COMMA', 'OEM_PERIOD', 'OEM_2', 'SHIFT'],
+	['CTRL', 'WIN', 'ALT', 'LANG', 'SPACE', 'LEFT', 'UP', 'DOWN', 'RIGHT', 'DEL']
+];
+
+const EnLayoutTitles = [
+	['Esc', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '◄'],
+	['Tab', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'],
+	['Caps Lock', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', 'Enter'],
+	['Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 'Shift'],
+	['Ctrl', '🪟', 'Alt', '🌐', '', '←', '↑', '↓', '→', 'Del']
+];
+
+const EnLayoutTitlesShift = [
+	['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '`'],
+	['Tab', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '|'],
+	['Caps Lock', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', 'Enter'],
+	['Shift', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', 'Shift'],
+	['Ctrl', '🪟', 'Alt', '🌐', '', '←', '↑', '↓', '→', 'Del']
+];
+
+// Other languages -> layouts.js
+
+let IDS_ENTER_ADDRESS = 'Enter the IP address:';
+let IDS_ENTER_LANG = 'Enter one of the languages\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):';
+let IDS_HELP = '"ALT + LANG" - switch the on-screen layout without sending a command.\n\n"CTRL + ALT + =" - change the secondary language.\n\n"CTRL + ALT + Backspace" - enter the address.';
+
+const LangStrings = {
+    ru: ['Введите IP адрес:', 'Введите один из языков\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - смена экранной раскладки без отправки команды.\n\n"CTRL + ALT + =" - изменить второй язык.\n\n"CTRL + ALT + Backspace" - ввод адреса.'],
+    zh: ['输入 IP 地址:', '请输入语言之一\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - 切换屏幕布局（不发送命令）。\n\n"CTRL + ALT + =" - 更改第二语言。\n\n"CTRL + ALT + Backspace" - 输入地址。'],
+    es: ['Introduzca la dirección IP:', 'Introduzca uno de los idiomas\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - cambiar la distribución sin enviar un comando.\n\n"CTRL + ALT + =" - cambiar el segundo idioma.\n\n"CTRL + ALT + Backspace" - ingresar dirección.'],
+    pt: ['Digite o endereço IP:', 'Digite um dos idiomas\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - alterar o layout sem enviar comando.\n\n"CTRL + ALT + =" - alterar o segundo idioma.\n\n"CTRL + ALT + Backspace" - inserir endereço.'],
+    fr: ['Entrez l’adresse IP :', 'Entrez une des langues\n(ru, zh, es, pt, fr, de, ja, ar, it, ko) :', '"ALT + LANG" - changer la disposition sans envoyer de commande.\n\n"CTRL + ALT + =" - changer la deuxième langue.\n\n"CTRL + ALT + Backspace" - entrer l’adresse.'],
+    de: ['IP-Adresse eingeben:', 'Geben Sie eine der Sprachen ein\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - Layout ändern, ohne Befehl zu senden.\n\n"CTRL + ALT + =" - zweite Sprache ändern.\n\n"CTRL + ALT + Backspace" - Adresse eingeben.'],
+    ja: ['IP アドレスを入力してください:', '次のいずれかの言語を入力してください\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - レイアウトを変更（コマンドは送信されません）。\n\n"CTRL + ALT + =" - 2 番目の言語を変更します。\n\n"CTRL + ALT + Backspace" - アドレスを入力。'],
+    ar: ['أدخل عنوان IP:', 'أدخل إحدى اللغات\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - تغيير تخطيط الشاشة دون إرسال أمر.\n\n"CTRL + ALT + =" - تغيير اللغة الثانية.\n\n"CTRL + ALT + Backspace" - إدخال العنوان.'],
+    it: ['Inserisci l’indirizzo IP:', 'Inserisci una delle lingue\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - cambia layout senza inviare comandi.\n\n"CTRL + ALT + =" - cambia la seconda lingua.\n\n"CTRL + ALT + Backspace" - inserisci l’indirizzo.'],
+    ko: ['IP 주소를 입력하세요:', '다음 언어 중 하나를 입력하세요\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - 명령 없이 레이아웃 변경.\n\n"CTRL + ALT + =" - 두 번째 언어를 변경합니다.\n\n"CTRL + ALT + Backspace" - 주소 입력.']
+};
+
+function UpdateCurrentLang() {
+	switch (CurrentLayoutLang) {
+		case 'en': CurrentLayout = EnLayoutTitles; CurrentLayoutShift = EnLayoutTitlesShift; break;
+		case 'ru': CurrentLayout = RuLayoutTitles; CurrentLayoutShift = RuLayoutTitlesShift; break;
+		case 'zh': CurrentLayout = EnLayoutTitles; CurrentLayoutShift = EnLayoutTitlesShift; break; // Hieroglyphs are entered using the Latin alphabet
+		case 'es': CurrentLayout = EsLayoutTitles; CurrentLayoutShift = EsLayoutTitlesShift; break;
+		case 'pt': CurrentLayout = PtBrLayoutTitles; CurrentLayoutShift = PtBrLayoutTitlesShift; break;
+		case 'fr': CurrentLayout = FrLayoutTitles; CurrentLayoutShift = FrLayoutTitlesShift; break;
+		case 'de': CurrentLayout = DeLayoutTitles; CurrentLayoutShift = DeLayoutTitlesShift; break;
+		case 'ja': CurrentLayout = EnLayoutTitles; CurrentLayoutShift = EnLayoutTitlesShift; break; // Hieroglyphs are entered using the Latin alphabet
+		case 'ar': CurrentLayout = ArLayoutTitles; CurrentLayoutShift = ArLayoutTitlesShift; break;
+		case 'it': CurrentLayout = ItLayoutTitles; CurrentLayoutShift = ItLayoutTitlesShift; break;
+		case 'ko': CurrentLayout = KoLayoutTitles; CurrentLayoutShift = KoLayoutTitlesShift; break;
+	}
+}
+
+function ChangeLang() {
+	if (CustomLang == 'en') return;
+	CurrentLayoutLang = CurrentLayoutLang == CustomLang ? 'en' : CustomLang;
+	UpdateCurrentLang();
+	ShowLayout();	
+}
+
+function SendKeyPress(key) {
+	if (key == 'LANG') {
+		ChangeLang();
+		if (AltPressed) {
+			AltPressed = false;
+			return;
+		}
+	}
+	if (key == 'SHIFT') {
+		ShiftPressed = !ShiftPressed;
+		ShowLayout();
+		return;
+	}
+	if (key == 'CTRL') {
+		CtrlPressed = !CtrlPressed;
+		return;
+	}
+	if (key == 'ALT') {
+		AltPressed = !AltPressed;
+		return;
+	}
+	
+	if (CtrlPressed) { key = 'CTRL|' + key; CtrlPressed = false; }
+	if (AltPressed) { key = 'ALT|' + key; AltPressed = false; }
+	if (ShiftPressed) { key = 'SHIFT|' + key; ShiftPressed = false; ShowLayout(); }
+	
+	// Hot keys
+	// Enter address
+	if (Server == '' || key == 'ALT|CTRL|BACKSPACE') {	
+		Server = prompt(IDS_ENTER_ADDRESS, 'http://192.168.0.1:7533');
+		if (Server) localStorage.setItem('Server', Server.trim());
+		return;
+	}
+	// Enter lang
+	if (key == 'ALT|CTRL|OEM_PLUS') {	
+		let Lang = prompt(IDS_ENTER_LANG, '');
+		let allowed = ['ru', 'zh', 'es', 'pt', 'fr', 'de', 'ja', 'ar', 'it', 'ko'];
+		if (Lang && allowed.includes(Lang.trim())) {
+			localStorage.setItem('Lang', Lang.trim());
+			location.reload();
+		}
+		return;
+	}
+	// Help
+	if (key == 'ALT|CTRL|OEM_MINUS') {
+		alert(IDS_HELP);
+		return;
+	}
+	if (key == 'SHIFT|ESC') { key = 'SHIFT|OEM_3';  }
+	if (key == 'SHIFT|BACKSPACE') { key = 'OEM_3'; }
+
+    return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', Server + '/keypress?key=' + encodeURIComponent(key), true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    resolve(xhr.responseText);
+                } else {
+                    reject('Ошибка: ' + xhr.status);
+                }
+            }
+        };
+        xhr.send();
+    });
+}
+
+function CheckOrientation() {
+	ButtonsWidthMul = window.matchMedia("(orientation: portrait)").matches ? 0.3 : 1;
+}
+
+function ShowLayout() {
+    KeyboardDiv.innerHTML = '';
+    EnLayout.forEach((rowKeys, rowIndex) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.classList.add('row');
+        rowKeys.forEach((key, keyIndex) => {
+            const button = document.createElement('div');
+			button.setAttribute('class', 'button');
+			if (ShiftPressed == false)
+				button.innerHTML = CurrentLayout[rowIndex][keyIndex]; 
+			else
+				button.innerHTML = CurrentLayoutShift[rowIndex][keyIndex];
+			if (rowIndex == 0) {
+				if (keyIndex == 0) button.style.width = 40 * ButtonsWidthMul + 'px'; // Esc
+				if (keyIndex == 13) button.style.width = 60 * ButtonsWidthMul + 'px'; // Backspace
+			} else if (rowIndex == 1) {
+				if (keyIndex == 0) button.style.width = 60 * ButtonsWidthMul + 'px'; // Tab
+				if (keyIndex == 13) button.style.width = 40 * ButtonsWidthMul + 'px'; // \
+			} else if (rowIndex == 2) {
+				if (keyIndex == 0) button.style.width = 80 * ButtonsWidthMul + 'px'; // Caps Lock
+				if (keyIndex == 12) button.style.width = 80 * ButtonsWidthMul + 'px'; // Enter
+			} else if (rowIndex == 3) {
+				if (keyIndex == 0) button.style.width = 90 * ButtonsWidthMul + 'px'; // Shift
+				if (keyIndex == 11) button.style.width = 90 * ButtonsWidthMul + 'px'; // Shift
+			} else if (rowIndex == 4) {
+				// Win
+				if (keyIndex == 1) {
+					button.style.width = 10 * ButtonsWidthMul + 'px';
+					button.innerHTML = '<img src="images/win.png">';
+				} 
+				if (keyIndex == 4) button.style.width = 170 * ButtonsWidthMul + 'px'; // Space
+				// LANG
+				if (keyIndex == 3) button.innerHTML = '<img src="images/lang.png">';
+			}
+            button.alt = key;
+            button.onclick = () => SendKeyPress(key);
+            rowDiv.appendChild(button);
+        });
+        KeyboardDiv.appendChild(rowDiv);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+
+	if (localStorage.getItem('Lang') == null) {
+		let lang = navigator.language.toLowerCase();
+
+		if (lang.startsWith('ru')) CustomLang = 'ru';
+		else if (lang.startsWith('zh')) CustomLang = 'zh';
+		else if (lang.startsWith('es')) CustomLang = 'es';
+		else if (lang.startsWith('pt')) CustomLang = 'pt';
+		else if (lang.startsWith('fr')) CustomLang = 'fr';
+		else if (lang.startsWith('de')) CustomLang = 'de';
+		else if (lang.startsWith('ja')) CustomLang = 'ja';
+		else if (lang.startsWith('ar')) CustomLang = 'ar';
+		else if (lang.startsWith('it')) CustomLang = 'it';
+		else if (lang.startsWith('ko')) CustomLang = 'ko';
+		localStorage.setItem('Lang', CustomLang);
+	} else
+		CustomLang = localStorage.getItem('Lang');
+
+	if (CustomLang != 'en') {
+		CurrentLayoutLang = CustomLang;
+		IDS_ENTER_ADDRESS = LangStrings[CustomLang][0];
+		IDS_ENTER_LANG = LangStrings[CustomLang][1];
+		IDS_HELP = LangStrings[CustomLang][2];
+	}
+
+	KeyboardDiv = document.getElementById('keyboard');
+
+	if (localStorage.getItem('Server') != null)
+		Server = localStorage.getItem('Server');
+	
+	if (!IsAndroid) { // для iOS
+		CheckOrientation();
+		window.addEventListener('resize', function() {
+			CheckOrientation();
+			ShowLayout();
+		});
+	}
+	
+	UpdateCurrentLang();
+	ShowLayout();
+});
+</script>
+</head>
+<body ontouchstart="">
+    <div id="keyboard"></div>
+</body>
+</html>
