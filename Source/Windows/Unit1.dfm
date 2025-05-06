@@ -77,6 +77,7 @@ object Main: TMain
     Height = 89
     ScrollBars = ssBoth
     TabOrder = 4
+    OnChange = AllowedIPsMemoChange
   end
   object AllowAnyIPsCB: TCheckBox
     Left = 8

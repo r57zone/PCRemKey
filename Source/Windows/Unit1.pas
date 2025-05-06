@@ -40,6 +40,7 @@ type
     procedure OkBtnClick(Sender: TObject);
     procedure CancelBtnClick(Sender: TObject);
     procedure AllowAnyIPsCBClick(Sender: TObject);
+    procedure AllowedIPsMemoChange(Sender: TObject);
   private
     procedure DefaultHandler(var Message); override;
     { Private declarations }
@@ -59,6 +60,7 @@ var
   AllowClose: boolean = false;
   AllowedIPs: TStringList;
   AllowAnyIPs, BlockReqNewDevs: boolean;
+  IPSMemoChanged: boolean = false;
 
   IDS_DEV_SYNC_CONFIRM, IDS_ABOUT, IDS_LAST_UPDATE: string;
 
@@ -387,6 +389,9 @@ begin
   Ini.WriteBool('Main', 'BlockRequestNewDevs', BlockReqNewDevs);
   Ini.Free;
 
+  if IPSMemoChanged then
+    AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + 'AllowedIPs.txt');
+
   //AppHide;
   IdHTTPServer.Active:=false;
   WinExec(PChar(ParamStr(0)), SW_SHOW);
@@ -402,6 +407,11 @@ end;
 procedure TMain.AllowAnyIPsCBClick(Sender: TObject);
 begin
   AllowedIPsMemo.Enabled:=not AllowAnyIPsCB.Checked;
+end;
+
+procedure TMain.AllowedIPsMemoChange(Sender: TObject);
+begin
+  IPSMemoChanged:=true;
 end;
 
 end.
