@@ -25,7 +25,7 @@
 ![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
 
 
-Для ввода IP адреса, на мобильном устройстве, нажмите `CTRL + ALT + BACKSPACE`.
+Для ввода IP адреса, на устройствах Android, нажмите `CTRL + ALT + BACKSPACE`.
 
 
 Если клавиатура Windows отличается от клавиатуры на мобильном устройстве, то нажмите `ALT + LANG` (смена раскладки только на устройстве).

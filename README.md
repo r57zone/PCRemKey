@@ -27,7 +27,7 @@ The following languages ​​are supported: English, Russian, Chinese (Traditio
 ![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
 
 
-To enter an IP address on a mobile device, press `CTRL + ALT + BACKSPACE`.
+To enter an IP address on a Android device, press `CTRL + ALT + BACKSPACE`.
 
 If the Windows keyboard layout differs from the mobile device keyboard, press `ALT + LANG` (change layout only on the device)..
 
