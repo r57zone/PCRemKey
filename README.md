@@ -43,7 +43,7 @@ Show hint with `CTRL + ALT + -`.
 4. To enable autorun, add a shortcut to PCRemKey.exe in the Windows startup folder: `%AppData%\Microsoft\Windows\Start Menu\Programs\Startup`.
 
 ### Android
-Install `PCRemKey.apk`, select automatic IP address search or enter a reserved permanent IP of your computer.
+Install `PCRemKey.apk`, press any letter or number, enter the reserved permanent IP of your computer.
 
 ### iOS
 1. Open Safari browser on your mobile device and enter `http://IP:7533/webapp`, where IP is the reserved permanent IP of your computer.

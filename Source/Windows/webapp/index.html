@@ -176,7 +176,7 @@ function SendKeyPress(key) {
 	
 	// Hot keys
 	// Enter address
-	if (Server == '' || key == 'ALT|CTRL|BACKSPACE') {	
+	if (IsAndroid && (Server == '' || key == 'ALT|CTRL|BACKSPACE')) {	
 		Server = prompt(IDS_ENTER_ADDRESS, 'http://192.168.0.1:7533');
 		if (Server) localStorage.setItem('Server', Server.trim());
 		return;
@@ -289,10 +289,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
 	KeyboardDiv = document.getElementById('keyboard');
 
-	if (localStorage.getItem('Server') != null)
-		Server = localStorage.getItem('Server');
-	
-	if (!IsAndroid) { // для iOS
+	if (IsAndroid) { 
+		if (localStorage.getItem('Server') != null)
+			Server = localStorage.getItem('Server');
+	} else { // для iOS
 		CheckOrientation();
 		window.addEventListener('resize', function() {
 			CheckOrientation();
