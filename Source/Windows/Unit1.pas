@@ -12,7 +12,7 @@ type
     IdHTTPServer: TIdHTTPServer;
     CommandKeyEdt: TEdit;
     CommandLbl: TLabel;
-    PopupMenu: TPopupMenu;
+    PopupMenuApp: TPopupMenu;
     CloseBtn: TMenuItem;
     AboutBtn: TMenuItem;
     LineBtn: TMenuItem;
@@ -41,12 +41,13 @@ type
     procedure CancelBtnClick(Sender: TObject);
     procedure AllowAnyIPsCBClick(Sender: TObject);
     procedure AllowedIPsMemoChange(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
   private
     procedure DefaultHandler(var Message); override;
     { Private declarations }
   protected
     procedure IconMouse(var Msg: TMessage); message WM_USER + 1;
-    procedure WMActivate(var Msg: TMessage); message WM_ACTIVATE;
+    //procedure WMActivate(var Msg: TMessage); message WM_ACTIVATE;
   public
     procedure AppShow;
     procedure AppHide;
@@ -55,7 +56,7 @@ type
 
 var
   Main: TMain;
-  RunOnce, DebugMode: boolean;
+  DebugMode: boolean;
   WM_TASKBARCREATED: Cardinal;
   AllowClose: boolean = false;
   AllowedIPs: TStringList;
@@ -214,7 +215,8 @@ begin
   //CoUninitialize;
 end;
 
-procedure Tray(ActInd: integer); // 1 - добавить, 2 - изменить, 3 - удалить
+type TTrayAction = (TrayAdd, TrayUpdate, TrayDelete);
+procedure Tray(TrayAction: TTrayAction);
 var
   NIM: TNotifyIconData;
 begin
@@ -223,14 +225,14 @@ begin
     Wnd:=Main.Handle;
     uId:=1;
     uFlags:=NIF_MESSAGE or NIF_ICON or NIF_TIP;
-    hIcon:=SendMessage(Application.Handle, WM_GETICON, ICON_SMALL2, 0);
+    hIcon:=SendMessage(Main.Handle, WM_GETICON, ICON_SMALL2, 0);
     uCallBackMessage:=WM_USER + 1;
     StrCopy(szTip, PChar(Application.Title));
   end;
-  case ActInd of
-    1: Shell_NotifyIcon(NIM_ADD, @NIM);
-    2: Shell_NotifyIcon(NIM_MODIFY, @NIM);
-    3: Shell_NotifyIcon(NIM_DELETE, @NIM);
+  case TrayAction of
+    TrayAdd: Shell_NotifyIcon(NIM_ADD, @NIM);
+    TrayUpdate: Shell_NotifyIcon(NIM_MODIFY, @NIM);
+    TrayDelete: Shell_NotifyIcon(NIM_DELETE, @NIM);
   end;
 end;
 
@@ -248,10 +250,8 @@ var
   Ini: TIniFile;
 begin
   Application.Title:=Caption;
-  AppHide;
   WM_TASKBARCREATED:=RegisterWindowMessage('TaskbarCreated');
-  Tray(1);
-  SetWindowLong(Application.Handle, GWL_EXSTYLE, GetWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);
+  //SetWindowLong(Application.Handle, GWL_EXSTYLE, GetWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);
 
   if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
     IDS_ABOUT:='О программе...';
@@ -300,52 +300,54 @@ begin
   case Msg.LParam of
     WM_LBUTTONDOWN:
       begin
-        if IsWindowVisible(Main.Handle) then
-          AppHide
-        else
-          AppShow;
+        // Скрываем PopupMenu, если показан
+        PostMessage(Handle, WM_LBUTTONDOWN, MK_LBUTTON, 0);
+        PostMessage(Handle, WM_LBUTTONUP, MK_LBUTTON, 0);
       end;
 
+    WM_LBUTTONDBLCLK:
+        if IsWindowVisible(Handle) then AppHide else AppShow;
+
     WM_RBUTTONDOWN:
-      PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
+      PopupMenuApp.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
   end;
 end;
 
-procedure TMain.WMActivate(var Msg: TMessage);
+{procedure TMain.WMActivate(var Msg: TMessage);
 begin
   if (Msg.WParam = WA_INACTIVE) then
     AppHide;
   inherited;
-end;
+end;}
 
 procedure TMain.FormDestroy(Sender: TObject);
 begin
   AllowClose:=true;
   AllowedIPs.Free;
-  Tray(3);
+  Tray(TrayDelete);
 end;
 
 procedure TMain.DefaultHandler(var Message);
 begin
   if TMessage(Message).Msg = WM_TASKBARCREATED then
-    Tray(1);
+    Tray(TrayAdd);
   inherited;
 end;
 
 procedure TMain.AppHide;
 begin
   AllowClose:=true;
-  ShowWindow(Handle, SW_HIDE);
+  Tray(TrayAdd);
+  ShowWindow(Main.Handle, SW_HIDE);  // Скрываем программу
+  ShowWindow(Application.Handle, SW_HIDE);  // Скрываем с панели задач
 end;
 
 procedure TMain.AppShow;
 begin
-  if Main.AlphaBlend then begin
-    Main.AlphaBlendValue:=255;
-    Main.AlphaBlend:=false;
-  end;
-  ShowWindow(Handle, SW_SHOW);
+  ShowWindow(Main.Handle, SW_SHOW);  // Показываем программу
+  ShowWindow(Application.Handle, SW_SHOW);  // Показываем программу на панели задач
   SetForegroundWindow(Handle);
+  Tray(TrayDelete);
   AllowClose:=false;
 end;
 
@@ -363,8 +365,8 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Caption + ' 1.0' + #13#10 +
-  IDS_LAST_UPDATE + ' 06.05.25' + #13#10 +
+  Application.MessageBox(PChar(Caption + ' 1.0.2' + #13#10 +
+  IDS_LAST_UPDATE + ' 29.10.25' + #13#10 +
   'https://r57zone.github.io' + #13#10 +
   'r57zone@gmail.com'), PChar(IDS_ABOUT), MB_ICONINFORMATION);
 end;
@@ -392,7 +394,6 @@ begin
   if IPSMemoChanged then
     AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + 'AllowedIPs.txt');
 
-  //AppHide;
   IdHTTPServer.Active:=false;
   WinExec(PChar(ParamStr(0)), SW_SHOW);
   AllowClose:=true;
@@ -412,6 +413,15 @@ end;
 procedure TMain.AllowedIPsMemoChange(Sender: TObject);
 begin
   IPSMemoChanged:=true;
+end;
+
+procedure TMain.FormActivate(Sender: TObject);
+begin
+  if Main.AlphaBlend then begin
+    AppHide;
+    Main.AlphaBlendValue:=255;
+    Main.AlphaBlend:=false;
+  end;
 end;
 
 end.

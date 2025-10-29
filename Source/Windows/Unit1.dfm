@@ -16,6 +16,7 @@ object Main: TMain
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnActivate = FormActivate
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -135,7 +136,7 @@ object Main: TMain
     Left = 16
     Top = 104
   end
-  object PopupMenu: TPopupMenu
+  object PopupMenuApp: TPopupMenu
     Left = 48
     Top = 104
     object AboutBtn: TMenuItem
