@@ -58,4 +58,4 @@
 **[Загрузить](https://github.com/r57zone/PCRemKey/releases)**
 
 ## Обратная связь
-`r57zone[собака]gmail.com`
+`r57zone@gmail.com`

@@ -59,4 +59,4 @@ Install `PCRemKey.apk` and enter the reserved permanent IP of your computer.
 **[Download](https://github.com/r57zone/PCRemKey/releases)**
 
 ## Feedback
-`r57zone[at]gmail.com`
+`r57zone@gmail.com`
