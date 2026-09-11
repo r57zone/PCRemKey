@@ -3,8 +3,7 @@
 ← Choose language | Выберите язык
 
 # PCRemKey
-
-Remote PC Keyboard for Android and iOS.
+Control your PC using a keyboard and a remote control for Android and iOS.
 
 [![](https://github.com/user-attachments/assets/e589b0a0-836f-4e37-b4ca-e1e18ca0a136)](https://github.com/user-attachments/assets/8cb3b709-569d-4959-a4fa-092b42d328be)
 [![](https://github.com/user-attachments/assets/be79c1e3-6387-4b57-8680-e8500052ee70)](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)
