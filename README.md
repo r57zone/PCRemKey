@@ -9,7 +9,7 @@ Control your PC using a keyboard and a remote control for Android and iOS.
 [![](https://github.com/user-attachments/assets/be79c1e3-6387-4b57-8680-e8500052ee70)](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)
 
 ## Features
-The following languages ​​are supported: English, Russian, Chinese (Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
+The following languages ​​are supported: English, Russian, Chinese (Simplified and Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
 
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)

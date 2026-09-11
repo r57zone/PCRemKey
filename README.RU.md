@@ -6,7 +6,7 @@
 [![](https://github.com/user-attachments/assets/ae2c8acb-0400-41cb-836a-5a27656ccbe0)](https://github.com/user-attachments/assets/2b29fc41-4b52-4153-9363-845533b1ef66)
 [![](https://github.com/user-attachments/assets/be79c1e3-6387-4b57-8680-e8500052ee70)](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)
 ## Особенности
-Поддерживаются следующие языки: английский, русский, китайский (традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
+Поддерживаются следующие языки: английский, русский, китайский (упрощенный и традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
 
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)
