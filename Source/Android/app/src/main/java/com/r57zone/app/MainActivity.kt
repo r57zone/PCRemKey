@@ -1,4 +1,4 @@
-package com.sysalovm.app
+package com.r57zone.pcremkey
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -13,13 +14,15 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var webView: WebView
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main);
-        supportActionBar?.hide(); /* Спрятать sidebar */
+        //supportActionBar?.hide(); /* Спрятать sidebar */
 
-        val webView = findViewById<WebView>(R.id.webView);
+        webView = findViewById(R.id.webView);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().domStorageEnabled = true; // Включение localStorage
         webView.loadUrl("file:///android_asset/index.html");
@@ -43,5 +46,19 @@ class MainActivity : AppCompatActivity() {
 
         webView.setWebViewClient(webViewClient);
         webView.webChromeClient = WebChromeClient(); // Включаение confirm & alert
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                webView.evaluateJavascript("SendRemoteCommand('VOLUME_UP');", null)
+                return true // не даём телефону заодно изменить свою собственную громкость
+            }
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                webView.evaluateJavascript("SendRemoteCommand('VOLUME_DOWN');", null)
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }
