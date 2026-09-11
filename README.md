@@ -6,7 +6,8 @@
 
 Remote PC Keyboard for Android and iOS.
 
-[![](https://github.com/user-attachments/assets/6543626f-25d9-45ca-8109-09c9e1cd5bc6)](https://github.com/user-attachments/assets/7ac8dec1-d35a-4931-833b-9a8fc1631f42)
+[![](https://github.com/user-attachments/assets/5a487fe9-60ba-49a9-8265-d3e683375085)](https://github.com/user-attachments/assets/7ac8dec1-d35a-4931-833b-9a8fc1631f42)
+[![](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)](https://github.com/user-attachments/assets/47836ca7-6192-4278-9939-911f6882ef1b)
 
 ## Features
 The following languages ​​are supported: English, Russian, Chinese (Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
@@ -29,9 +30,13 @@ The following languages ​​are supported: English, Russian, Chinese (Traditio
 
 To enter an IP address on a Android device, press `CTRL + ALT + BACKSPACE`.
 
-If the Windows keyboard layout differs from the mobile device keyboard, press `ALT + LANG` (change layout only on the device)..
+If the Windows keyboard layout differs from the mobile device keyboard, press `ALT + LANG` (change layout only on the PC).
 
 The second language is detected automatically; if needed, you can switch it manually by pressing `CTRL + ALT + =`.
+
+
+Change mouse sensitivity: `CTRL + ALT + \`.
+
 
 Show hint with `CTRL + ALT + -`.
 
@@ -43,7 +48,7 @@ Show hint with `CTRL + ALT + -`.
 4. To enable autorun, add a shortcut to PCRemKey.exe in the Windows startup folder: `%AppData%\Microsoft\Windows\Start Menu\Programs\Startup`.
 
 ### Android
-Install `PCRemKey.apk`, press any letter or number, enter the reserved permanent IP of your computer.
+Install `PCRemKey.apk` and enter the reserved permanent IP of your computer.
 
 ### iOS
 1. Open Safari browser on your mobile device and enter `http://IP:7533/webapp`, where IP is the reserved permanent IP of your computer.
