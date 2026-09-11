@@ -4,8 +4,8 @@
 
 Удаленная клавиатура ПК для Android и iOS.
 
-[![](https://github.com/user-attachments/assets/8fbc3401-f3e5-430e-8647-4d17856d9b7b)](https://github.com/user-attachments/assets/36ecb71b-eae3-4b95-a00f-c5574b560b3b)
-[![](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)](https://github.com/user-attachments/assets/3732208f-7a6e-4dcd-8a0f-1766d91a7207)
+[![](https://github.com/user-attachments/assets/36ecb71b-eae3-4b95-a00f-c5574b560b3b)](https://github.com/user-attachments/assets/ae2c8acb-0400-41cb-836a-5a27656ccbe0)
+[![](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)](https://github.com/user-attachments/assets/e730a5f6-12d0-4063-96e9-542765c29a67)
 
 ## Особенности
 Поддерживаются следующие языки: английский, русский, китайский (традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
