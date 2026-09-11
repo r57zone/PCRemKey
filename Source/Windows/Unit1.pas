@@ -62,6 +62,7 @@ var
   AllowedIPs: TStringList;
   AllowAnyIPs, BlockReqNewDevs: boolean;
   IPSMemoChanged: boolean = false;
+  AppPath: string;
 
   IDS_DEV_SYNC_CONFIRM, IDS_ABOUT, IDS_LAST_UPDATE: string;
 
@@ -72,19 +73,78 @@ implementation
 
 {$R *.dfm}
 
+procedure EmulateScroll(Key: string);
+const
+  WHEEL_DELTA = 120;
+var
+  P1: Integer;
+  S1, S2: string;
+  Notches: Integer;
+begin
+  P1:=Pos(':', Key);
+  if P1 = 0 then Exit;
+
+  S1:=Copy(Key, 1, P1 - 1);
+  S2:=Copy(Key, P1 + 1, Length(Key));
+
+  if S1 <> 'SCROLL' then Exit;
+
+  Notches:=StrToIntDef(S2, 0);
+  if Notches = 0 then Exit;
+
+  mouse_event(MOUSEEVENTF_WHEEL, 0, 0, Notches * WHEEL_DELTA, 0);
+end;
+
+procedure EmulateMouseMove(Key: string);
+var
+  P: TPoint;
+  S1, S2, S3: string;
+  P1, P2: Integer;
+begin
+  P1:=Pos(':', Key);
+  if P1 = 0 then Exit;
+
+  S1:= Copy(Key, 1, P1 - 1);
+  Delete(Key, 1, P1);
+
+  P2:= Pos(':', Key);
+  if P2 = 0 then Exit;
+
+  S2:=Copy(Key, 1, P2 - 1);
+  S3:=Copy(Key, P2 + 1, Length(Key));
+
+  if S1 <> 'MOUSEMOVE' then Exit;
+
+  GetCursorPos(P);
+  SetCursorPos(P.X + StrToIntDef(S2, 0), P.Y + StrToIntDef(S3, 0));
+end;
+
+procedure EmulateMouseClick;
+begin
+  mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+  mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+end;
+
 procedure EmulateKeyPress(Key: string);
 const
-  VK_OEM_1      = $BA; // ';:' для US раскладки
-  VK_OEM_PLUS   = $BB; // '+' на основной клавиатуре
-  VK_OEM_COMMA  = $BC; // ','
-  VK_OEM_MINUS  = $BD; // '-'
+  VK_OEM_1 = $BA; // ';:' для US раскладки
+  VK_OEM_PLUS = $BB; // '+' на основной клавиатуре
+  VK_OEM_COMMA = $BC; // ','
+  VK_OEM_MINUS = $BD; // '-'
   VK_OEM_PERIOD = $BE; // '.'
-  VK_OEM_2      = $BF; // '/?' (обычно)
-  VK_OEM_3      = $C0; // '`~' (тильда)
-  VK_OEM_4      = $DB; // '[{' (левая квадратная скобка)
-  VK_OEM_5      = $DC; // '\|' (обратный слэш)
-  VK_OEM_6      = $DD; // ']}' (правая квадратная скобка)
-  VK_OEM_7      = $DE; // '''"' (апостроф и кавычка)
+  VK_OEM_2 = $BF; // '/?' (обычно)
+  VK_OEM_3 = $C0; // '`~' (тильда)
+  VK_OEM_4 = $DB; // '[{' (левая квадратная скобка)
+  VK_OEM_5 = $DC; // '\|' (обратный слэш)
+  VK_OEM_6 = $DD; // ']}' (правая квадратная скобка)
+  VK_OEM_7 = $DE; // '''"' (апостроф и кавычка)
+  VK_VOLUME_DOWN = $AE;
+  VK_VOLUME_UP = $AF;
+  VK_BROWSER_REFRESH = $A8;
+  VK_MEDIA_PREV_TRACK = $B0;
+  VK_MEDIA_NEXT_TRACK = $B1;
+  VK_MEDIA_PLAY_PAUSE = $B3;
+  VK_VOLUME_MUTE = $AD;
 var
   KeyCode: Word;
   CtrlPressed, AltPressed, ShiftPressed: boolean;
@@ -126,12 +186,38 @@ begin
   if Key = 'UP' then KeyCode:=VK_UP else
   if Key = 'DOWN' then KeyCode:=VK_DOWN else
   if Key = 'RIGHT' then KeyCode:=VK_RIGHT else
-  if Key = 'DEL' then KeyCode:=VK_DELETE else
+  if Key = 'DELETE' then KeyCode:=VK_DELETE else
+
+  if Key = 'CONTEXT_MENU' then begin
+    mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+    mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+    exit;
+  end else
+  if Key = 'VOLUME_UP' then KeyCode:=VK_VOLUME_UP else
+  if Key = 'VOLUME_DOWN' then KeyCode:=VK_VOLUME_DOWN else
+  if Key = 'NEXT_APP' then begin
+    keybd_event(VK_MENU, 0, 0, 0);
+    keybd_event(VK_ESCAPE, 0, 0, 0);
+    keybd_event(VK_ESCAPE, 0, KEYEVENTF_KEYUP, 0);
+    keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0);
+    exit;
+  end else
+  if Key = 'CLOSE_APP' then begin
+    keybd_event(VK_MENU, 0, 0, 0);
+    keybd_event(VK_F4, 0, 0, 0);
+    keybd_event(VK_F4, 0, KEYEVENTF_KEYUP, 0);
+    keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0);
+    exit;
+  end else
+  if Key = 'BROWSER_REFRESH' then KeyCode:=VK_BROWSER_REFRESH else
+  if Key = 'MEDIA_PREV' then KeyCode:=VK_MEDIA_PREV_TRACK else
+  if Key = 'MEDIA_NEXT' then KeyCode:=VK_MEDIA_NEXT_TRACK else
+  if Key = 'MEDIA_PLAY_PAUSE' then KeyCode:=VK_MEDIA_PLAY_PAUSE else
 
   if (Length(Key) = 1) and ((Key[1] in ['A'..'Z']) or (Key[1] in ['0'..'9'])) then
     KeyCode:=Ord(Key[1])
   else
-    exit;
+    Exit;
 
   // Модификаторы
   if CtrlPressed then keybd_event(VK_CONTROL, 0, 0, 0);   // Нажатие клавиши
@@ -157,7 +243,7 @@ const
   ErrorStatus = 'error';
 var
   i: integer;
-  RequestDocument: string;
+  RequestDocument, ExtName: string;
 
   KeyValue: string;
 begin
@@ -171,7 +257,7 @@ begin
     case MessageBox(Handle, PChar(Format(IDS_DEV_SYNC_CONFIRM, [AThread.Connection.Socket.Binding.PeerIP])), PChar(Caption), 35) of
       6: begin
           AllowedIPs.Add(AThread.Connection.Socket.Binding.PeerIP);
-          AllowedIPs.SaveToFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile);
+          AllowedIPs.SaveToFile(AppPath + AllowedIPsFile);
           AResponseInfo.ContentText:=AuthorizationSuccessfulStatus;
          end;
       7: AResponseInfo.ContentText:=AuthorizationDeniedStatus;
@@ -186,23 +272,31 @@ begin
     if AnsiLowerCase(ARequestInfo.Params.Names[i]) = 'key' then begin
       KeyValue:=ARequestInfo.Params.ValueFromIndex[i];
       if DebugMode then CommandKeyEdt.Text:=KeyValue;
-      EmulateKeyPress(KeyValue);
+
+      if Pos('MOUSEMOVE:', KeyValue) = 1 then
+        EmulateMouseMove(KeyValue)
+      else if Pos('SCROLL:', KeyValue) = 1 then
+        EmulateScroll(KeyValue)
+      else if KeyValue = 'MOUSECLICK' then
+        EmulateMouseClick
+      else
+        EmulateKeyPress(KeyValue);
     end;
 
   if (RequestDocument <> 'none') then begin
-    RequestDocument:=ExtractFilePath(ParamStr(0)) + '\webapp' + StringReplace(ARequestInfo.Document, '/', '\', [rfReplaceAll]);
+    RequestDocument:=AppPath + 'webapp' + StringReplace(ARequestInfo.Document, '/', '\', [rfReplaceAll]);
     RequestDocument:=StringReplace(RequestDocument, '\\', '\', [rfReplaceAll]);
 
     if ARequestInfo.Document = '/webapp' then // по webapp отдаем главный файл
-      RequestDocument:=ExtractFilePath(ParamStr(0)) + 'webapp\index.html';
+      RequestDocument:=AppPath + 'webapp\index.html';
 
     if FileExists(RequestDocument) then begin
-
-      if (AnsiLowerCase(ExtractFileExt(ARequestInfo.Document)) = '.js') then
+      ExtName:=AnsiLowerCase(ExtractFileExt(ARequestInfo.Document));
+      if (ExtName = '.js') then
         AResponseInfo.ContentType:='application/javascript'
-      else if (AnsiLowerCase(ExtractFileExt(ARequestInfo.Document)) = '.ico') then
+      else if (ExtName = '.ico') then
         AResponseInfo.ContentType:='image/x-icon'
-      else if (AnsiLowerCase(ExtractFileExt(ARequestInfo.Document)) = '.png') then
+      else if (ExtName = '.png') then
         AResponseInfo.ContentType:='image/png'
       else
         AResponseInfo.ContentType:=IdHTTPServer.MIMETable.GetDefaultFileExt(RequestDocument);
@@ -251,6 +345,7 @@ var
 begin
   Application.Title:=Caption;
   WM_TASKBARCREATED:=RegisterWindowMessage('TaskbarCreated');
+  AppPath:=ExtractFilePath(ParamStr(0));
   //SetWindowLong(Application.Handle, GWL_EXSTYLE, GetWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);
 
   if GetLocaleInformation(LOCALE_SENGLANGUAGE) = 'Russian' then begin
@@ -272,12 +367,12 @@ begin
 
   // Ограничение IP адресов для управления
   AllowedIPs:=TStringList.Create;
-  if FileExists(ExtractFilePath(ParamStr(0)) + AllowedIPsFile) then begin
-    AllowedIPs.LoadFromFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile);
+  if FileExists(AppPath + AllowedIPsFile) then begin
+    AllowedIPs.LoadFromFile(AppPath + AllowedIPsFile);
     AllowedIPsMemo.Text:=AllowedIPs.Text;
   end;
 
-  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Setup.ini');
+  Ini:=TIniFile.Create(AppPath + 'Setup.ini');
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 7533);
   PortEdt.Text:=IntToStr(IdHTTPServer.DefaultPort);
   AllowAnyIPs:=Ini.ReadBool('Main', 'AllowAnyIPs', false);
@@ -286,7 +381,7 @@ begin
   Ini.Free;
   BlockReqNewDevsCB.Checked:=BlockReqNewDevs;
   AllowAnyIPsCB.Checked:=AllowAnyIPs;
-  AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + AllowedIPsFile); // В Ini ограничение на кол-во символов в строке
+  AllowedIPsMemo.Lines.SaveToFile(AppPath + AllowedIPsFile); // В Ini ограничение на кол-во символов в строке
   SetWindowLong(PortEdt.Handle, GWL_STYLE, GetWindowLong(PortEdt.Handle, GWL_STYLE) or ES_NUMBER);
 
   CommandLbl.Visible:=DebugMode;
@@ -365,8 +460,8 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Caption + ' 1.0.2' + #13#10 +
-  IDS_LAST_UPDATE + ' 29.10.25' + #13#10 +
+  Application.MessageBox(PChar(Caption + ' 1.1' + #13#10 +
+  IDS_LAST_UPDATE + ' 11.09.26' + #13#10 +
   'https://r57zone.github.io' + #13#10 +
   'r57zone@gmail.com'), PChar(IDS_ABOUT), MB_ICONINFORMATION);
 end;
@@ -385,14 +480,14 @@ begin
   AllowAnyIPs:=AllowAnyIPsCB.Checked;
   IdHTTPServer.DefaultPort:=StrToInt(PortEdt.Text);
 
-  Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Setup.ini');
+  Ini:=TIniFile.Create(AppPath + 'Setup.ini');
   Ini.WriteInteger('Main', 'Port', IdHTTPServer.DefaultPort);
   Ini.WriteBool('Main', 'AllowAnyIPs', AllowAnyIPs);
   Ini.WriteBool('Main', 'BlockRequestNewDevs', BlockReqNewDevs);
   Ini.Free;
 
   if IPSMemoChanged then
-    AllowedIPsMemo.Lines.SaveToFile(ExtractFilePath(ParamStr(0)) + 'AllowedIPs.txt');
+    AllowedIPsMemo.Lines.SaveToFile(AppPath + 'AllowedIPs.txt');
 
   IdHTTPServer.Active:=false;
   WinExec(PChar(ParamStr(0)), SW_SHOW);
