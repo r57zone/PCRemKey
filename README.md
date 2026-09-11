@@ -6,8 +6,8 @@
 
 Remote PC Keyboard for Android and iOS.
 
-[![](https://github.com/user-attachments/assets/e589b0a0-836f-4e37-b4ca-e1e18ca0a136)](https://github.com/user-attachments/assets/7ac8dec1-d35a-4931-833b-9a8fc1631f42)
-[![](https://github.com/user-attachments/assets/e730a5f6-12d0-4063-96e9-542765c29a67)](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)
+[![](https://github.com/user-attachments/assets/e589b0a0-836f-4e37-b4ca-e1e18ca0a136)](https://github.com/user-attachments/assets/8cb3b709-569d-4959-a4fa-092b42d328be)
+[![](https://github.com/user-attachments/assets/be79c1e3-6387-4b57-8680-e8500052ee70)](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)
 
 ## Features
 The following languages ​​are supported: English, Russian, Chinese (Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
