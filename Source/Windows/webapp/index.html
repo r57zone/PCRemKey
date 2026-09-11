@@ -54,6 +54,102 @@ body {
 .button:active{background-color:#0098d2;}
 .button img{max-width:10px; max-height:10px;}
 
+#remote {
+	position: fixed;
+	right: 130px;
+	top: 50%;
+	box-sizing: border-box;
+	display: none;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	transform: translateY(calc(-50%)) rotate(-90deg);
+}
+.remote-row {
+	display: flex;
+	justify-content: center;
+	gap: 30px;
+	margin: 8px 0;
+}
+.round-btn {
+	width: 46px;
+	height: 46px;
+	border-radius: 50%;
+	background-color: #333333;
+	color: #f8f8f8;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+}
+.round-btn:active { background-color: #0098d2; }
+.round-btn img{max-width:100%; max-height:100%;}
+.dpad-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 16px;
+	margin: 10px 0;
+}
+#dpad {
+	width: 180px;
+	height: 180px;
+	border-radius: 50%;
+	background-color: #f8f8f8;
+	position: relative;
+}
+#scrollpad {
+	width: 46px;
+	height: 180px;
+	border-radius: 14px;
+	background-color: #333333;
+	position: relative;
+	touch-action: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+#scrollpad-dummy {
+	width: 46px;
+	height: 180px;
+	position: relative;
+}
+#scrollpad:active { background-color: #0098d2; }
+.scrollpad-icon {
+	color: #f8f8f8;
+	font-size: 18px;
+	pointer-events: none;
+}
+#dpad .dpad-center {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 70px;
+	height: 70px;
+	border-radius: 50%;
+	background-color: #1a1a1a;
+	transform: translate(-50%, -50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #f8f8f8;
+	font-size: 14px;
+}
+.dpad-arrow {
+	position: absolute;
+	color: #1a1a1a;
+	font-size: 22px;
+	width: 30px;
+	height: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.dpad-arrow.n { top: 8px; left: 50%; transform: translateX(-50%); }
+.dpad-arrow.s { bottom: 8px; left: 50%; transform: translateX(-50%); }
+.dpad-arrow.w { left: 8px; top: 50%; transform: translateY(-50%); }
+.dpad-arrow.e { right: 8px; top: 50%; transform: translateY(-50%); }
+
 @media (orientation: landscape) {
 	.keyboard{
 		margin-top: 0;
@@ -79,15 +175,30 @@ let CurrentLayoutLang = CustomLang;
 let CurrentLayout;
 let CurrentLayoutShift;
 let ButtonsWidthMul = 1;
+let MouseSensitivity = 1.3;
 
-let IsAndroid = false;
+let IsAndroid = true;
+
+let RemoteDiv;
+const RemoteMode = 0;
+const KeyboardMode = 1;
+let CurrentMode = RemoteMode; // KeyboardMode | RemoteMode
+let TouchpadMode = true; // false = стрелки+Enter, true = тачпад (курсор)
+let LastTouchX = 0, LastTouchY = 0, TouchMoved = false;
+let JustStarted = false; // первое touchmove после touchstart не копим — гасит "проглоченный" браузером слоп
+let PendingDx = 0, PendingDy = 0;
+let LastFlushTime = 0;
+let MouseMoveTimer = null;
+const MOUSE_FLUSH_INTERVAL = 16; // мс, целевой интервал отправки (~60 Гц)
+let LastScrollY = 0, ScrollAccum = 0;
+const ScrollThreshold = 30; // px of swipe per one wheel notch
 
 const EnLayout = [
 	['ESC', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'OEM_MINUS', 'OEM_PLUS', 'BACKSPACE'],
 	['TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'OEM_4', 'OEM_6', 'OEM_5'],
 	['CAPSLOCK', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'OEM_1', 'OEM_7', 'ENTER'],
 	['SHIFT', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'OEM_COMMA', 'OEM_PERIOD', 'OEM_2', 'SHIFT'],
-	['CTRL', 'WIN', 'ALT', 'LANG', 'SPACE', 'LEFT', 'UP', 'DOWN', 'RIGHT', 'DEL']
+	['CTRL', 'WIN', 'ALT', 'LANG', 'SPACE', 'LEFT', 'UP', 'DOWN', 'RIGHT', 'DELETE']
 ];
 
 const EnLayoutTitles = [
@@ -109,29 +220,32 @@ const EnLayoutTitlesShift = [
 // Other languages -> layouts.js
 
 let IDS_ENTER_ADDRESS = 'Enter the IP address:';
-let IDS_ENTER_LANG = 'Enter one of the languages\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):';
-let IDS_HELP = '"ALT + LANG" - switch the on-screen layout without sending a command.\n\n"CTRL + ALT + =" - change the secondary language.\n\n"CTRL + ALT + Backspace" - enter the address.';
+let IDS_ENTER_LANG = 'Enter one of the languages\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):';
+let IDS_ENTER_MOUSE_SENSITIVITY = 'Enter mouse sensitivity:';
+let IDS_HELP = '"ALT + LANG" - switch the on-screen layout without sending a command.\n"CTRL + ALT + =" - change the secondary language.\n"CTRL + ALT + \\" - change mouse sensitivity.\n"CTRL + ALT + Backspace" - enter the address.';
 
 const LangStrings = {
-    ru: ['Введите IP адрес:', 'Введите один из языков\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - смена экранной раскладки без отправки команды.\n\n"CTRL + ALT + =" - изменить второй язык.\n\n"CTRL + ALT + Backspace" - ввод адреса.'],
-    zh: ['输入 IP 地址:', '请输入语言之一\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - 切换屏幕布局（不发送命令）。\n\n"CTRL + ALT + =" - 更改第二语言。\n\n"CTRL + ALT + Backspace" - 输入地址。'],
-    es: ['Introduzca la dirección IP:', 'Introduzca uno de los idiomas\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - cambiar la distribución sin enviar un comando.\n\n"CTRL + ALT + =" - cambiar el segundo idioma.\n\n"CTRL + ALT + Backspace" - ingresar dirección.'],
-    pt: ['Digite o endereço IP:', 'Digite um dos idiomas\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - alterar o layout sem enviar comando.\n\n"CTRL + ALT + =" - alterar o segundo idioma.\n\n"CTRL + ALT + Backspace" - inserir endereço.'],
-    fr: ['Entrez l’adresse IP :', 'Entrez une des langues\n(ru, zh, es, pt, fr, de, ja, ar, it, ko) :', '"ALT + LANG" - changer la disposition sans envoyer de commande.\n\n"CTRL + ALT + =" - changer la deuxième langue.\n\n"CTRL + ALT + Backspace" - entrer l’adresse.'],
-    de: ['IP-Adresse eingeben:', 'Geben Sie eine der Sprachen ein\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - Layout ändern, ohne Befehl zu senden.\n\n"CTRL + ALT + =" - zweite Sprache ändern.\n\n"CTRL + ALT + Backspace" - Adresse eingeben.'],
-    ja: ['IP アドレスを入力してください:', '次のいずれかの言語を入力してください\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - レイアウトを変更（コマンドは送信されません）。\n\n"CTRL + ALT + =" - 2 番目の言語を変更します。\n\n"CTRL + ALT + Backspace" - アドレスを入力。'],
-    ar: ['أدخل عنوان IP:', 'أدخل إحدى اللغات\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - تغيير تخطيط الشاشة دون إرسال أمر.\n\n"CTRL + ALT + =" - تغيير اللغة الثانية.\n\n"CTRL + ALT + Backspace" - إدخال العنوان.'],
-    it: ['Inserisci l’indirizzo IP:', 'Inserisci una delle lingue\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - cambia layout senza inviare comandi.\n\n"CTRL + ALT + =" - cambia la seconda lingua.\n\n"CTRL + ALT + Backspace" - inserisci l’indirizzo.'],
-    ko: ['IP 주소를 입력하세요:', '다음 언어 중 하나를 입력하세요\n(ru, zh, es, pt, fr, de, ja, ar, it, ko):', '"ALT + LANG" - 명령 없이 레이아웃 변경.\n\n"CTRL + ALT + =" - 두 번째 언어를 변경합니다.\n\n"CTRL + ALT + Backspace" - 주소 입력.']
+    ru: ['Введите IP адрес:', 'Введите один из языков\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', 'Введите чувствительность мыши:', '"ALT + LANG" - смена экранной раскладки на ПК.\n"CTRL + ALT + =" - изменить второй язык.\n"CTRL + ALT + \\" - изменить чувствительность мыши.\n"CTRL + ALT + Backspace" - ввод адреса.'],
+    'zh-cn': ['输入 IP 地址:', '请输入语言之一\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', '输入鼠标灵敏度:', '"ALT + LANG" - 切换电脑上的屏幕布局。\n"CTRL + ALT + =" - 更改第二语言。\n"CTRL + ALT + \\" - 更改鼠标灵敏度。\n"CTRL + ALT + Backspace" - 输入地址。'],
+    'zh-tw': ['輸入 IP 位址:', '請輸入以下語言之一\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', '輸入滑鼠靈敏度:', '"ALT + LANG" - 切換電腦上的螢幕鍵盤配置。\n"CTRL + ALT + =" - 變更第二語言。\n"CTRL + ALT + \\" - 變更滑鼠靈敏度。\n"CTRL + ALT + Backspace" - 輸入位址。'],
+    es: ['Introduzca la dirección IP:', 'Introduzca uno de los idiomas\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', 'Introduzca la sensibilidad del ratón:', '"ALT + LANG" - cambiar la distribución en pantalla del PC.\n"CTRL + ALT + =" - cambiar el segundo idioma.\n"CTRL + ALT + \\" - cambiar la sensibilidad del ratón.\n"CTRL + ALT + Backspace" - introducir la dirección.'],
+    'pt-br': ['Digite o endereço IP:', 'Digite um dos idiomas\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', 'Digite a sensibilidade do mouse:', '"ALT + LANG" - alterar o layout na tela do PC.\n"CTRL + ALT + =" - alterar o segundo idioma.\n"CTRL + ALT + \\" - alterar a sensibilidade do mouse.\n"CTRL + ALT + Backspace" - inserir o endereço.'],
+    fr: ['Entrez l’adresse IP :', 'Entrez une des langues\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko) :', 'Entrez la sensibilité de la souris :', '"ALT + LANG" - changer la disposition à l’écran sur le PC.\n"CTRL + ALT + =" - changer la deuxième langue.\n"CTRL + ALT + \\" - changer la sensibilité de la souris.\n"CTRL + ALT + Backspace" - saisir l’adresse.'],
+    de: ['IP-Adresse eingeben:', 'Geben Sie eine der Sprachen ein\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', 'Mausempfindlichkeit eingeben:', '"ALT + LANG" - Bildschirm-Layout auf dem PC ändern.\n"CTRL + ALT + =" - zweite Sprache ändern.\n"CTRL + ALT + \\" - Mausempfindlichkeit ändern.\n"CTRL + ALT + Backspace" - Adresse eingeben.'],
+    ja: ['IP アドレスを入力してください:', '次のいずれかの言語を入力してください\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', 'マウス感度を入力してください:', '"ALT + LANG" - PC の画面レイアウトを変更します。\n"CTRL + ALT + =" - 2 番目の言語を変更します。\n"CTRL + ALT + \\" - マウス感度を変更します。\n"CTRL + ALT + Backspace" - アドレスを入力します。'],
+    ar: ['أدخل عنوان IP:', 'أدخل إحدى اللغات\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', 'أدخل حساسية الماوس:', '"ALT + LANG" - تغيير تخطيط الشاشة على الكمبيوتر.\n"CTRL + ALT + =" - تغيير اللغة الثانية.\n"CTRL + ALT + \\" - تغيير حساسية الماوس.\n"CTRL + ALT + Backspace" - إدخال العنوان.'],
+    it: ['Inserisci l’indirizzo IP:', 'Inserisci una delle lingue\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', 'Inserisci la sensibilità del mouse:', '"ALT + LANG" - cambia il layout dello schermo sul PC.\n"CTRL + ALT + =" - cambia la seconda lingua.\n"CTRL + ALT + \\" - cambia la sensibilità del mouse.\n"CTRL + ALT + Backspace" - inserisci l’indirizzo.'],
+    ko: ['IP 주소를 입력하세요:', '다음 언어 중 하나를 입력하세요\n(ru, zh-cn, zh-tw, es, pt-br, fr, de, ja, ar, it, ko):', '마우스 감도를 입력하세요:', '"ALT + LANG" - PC의 화면 레이아웃을 변경합니다.\n"CTRL + ALT + =" - 두 번째 언어를 변경합니다.\n"CTRL + ALT + \\" - 마우스 감도를 변경합니다.\n"CTRL + ALT + Backspace" - 주소를 입력합니다.']
 };
 
 function UpdateCurrentLang() {
 	switch (CurrentLayoutLang) {
 		case 'en': CurrentLayout = EnLayoutTitles; CurrentLayoutShift = EnLayoutTitlesShift; break;
 		case 'ru': CurrentLayout = RuLayoutTitles; CurrentLayoutShift = RuLayoutTitlesShift; break;
-		case 'zh': CurrentLayout = EnLayoutTitles; CurrentLayoutShift = EnLayoutTitlesShift; break; // Hieroglyphs are entered using the Latin alphabet
+		case 'zh-cn': CurrentLayout = EnLayoutTitles; CurrentLayoutShift = EnLayoutTitlesShift; break; // Hieroglyphs are entered using the Latin alphabet
+		case 'zh-tw': CurrentLayout = EnLayoutTitles; CurrentLayoutShift = EnLayoutTitlesShift; break; // Hieroglyphs are entered using the Latin alphabet
 		case 'es': CurrentLayout = EsLayoutTitles; CurrentLayoutShift = EsLayoutTitlesShift; break;
-		case 'pt': CurrentLayout = PtBrLayoutTitles; CurrentLayoutShift = PtBrLayoutTitlesShift; break;
+		case 'pt-br': CurrentLayout = PtBrLayoutTitles; CurrentLayoutShift = PtBrLayoutTitlesShift; break;
 		case 'fr': CurrentLayout = FrLayoutTitles; CurrentLayoutShift = FrLayoutTitlesShift; break;
 		case 'de': CurrentLayout = DeLayoutTitles; CurrentLayoutShift = DeLayoutTitlesShift; break;
 		case 'ja': CurrentLayout = EnLayoutTitles; CurrentLayoutShift = EnLayoutTitlesShift; break; // Hieroglyphs are entered using the Latin alphabet
@@ -150,10 +264,13 @@ function ChangeLang() {
 
 function SendKeyPress(key) {
 	if (key == 'LANG') {
-		ChangeLang();
 		if (AltPressed) {
+			// ALT + LANG: отправляем переключение языка на ПК,
+			// локальную (телефонную) раскладку НЕ трогаем
 			AltPressed = false;
-			return;
+		} else {
+			// обычный LANG (глобус): меняет отображаемую на телефоне раскладку и отправляется как раньше
+			ChangeLang();
 		}
 	}
 	if (key == 'SHIFT') {
@@ -176,24 +293,36 @@ function SendKeyPress(key) {
 	
 	// Hot keys
 	// Enter address
-	if (IsAndroid && (Server == '' || key == 'ALT|CTRL|BACKSPACE')) {	
-		Server = prompt(IDS_ENTER_ADDRESS, 'http://192.168.0.1:7533');
+	if (IsAndroid && key == 'ALT|CTRL|BACKSPACE') {
+		if (Server == '')
+			Server = prompt(IDS_ENTER_ADDRESS, 'http://192.168.0.1:7533');
+		else
+			Server = prompt(IDS_ENTER_ADDRESS, Server);
 		if (Server) localStorage.setItem('Server', Server.trim());
 		return;
 	}
-	// Enter lang
-	if (key == 'ALT|CTRL|OEM_PLUS') {	
-		let Lang = prompt(IDS_ENTER_LANG, '');
-		let allowed = ['ru', 'zh', 'es', 'pt', 'fr', 'de', 'ja', 'ar', 'it', 'ko'];
-		if (Lang && allowed.includes(Lang.trim())) {
-			localStorage.setItem('Lang', Lang.trim());
-			location.reload();
+	// Mouse Sensitivity
+	if (key == 'ALT|CTRL|OEM_5') {	
+		let NewMouseSensitivity = prompt(IDS_ENTER_MOUSE_SENSITIVITY, MouseSensitivity);
+		if (NewMouseSensitivity) {
+			let NewMouseSensitivityValue = parseFloat(NewMouseSensitivity.trim());
+			localStorage.setItem('MouseSensitivity', NewMouseSensitivityValue.toFixed(2));
+			MouseSensitivity = NewMouseSensitivityValue;
 		}
 		return;
 	}
 	// Help
 	if (key == 'ALT|CTRL|OEM_MINUS') {
 		alert(IDS_HELP);
+		return;
+	}
+	if (key == 'ALT|CTRL|OEM_PLUS') {	
+		let Lang = prompt(IDS_ENTER_LANG, '');
+		let allowed = ['ru', 'zh-cn', 'zh-tw', 'es', 'pt-br', 'fr', 'de', 'ja', 'ar', 'it', 'ko'];
+		if (Lang && allowed.includes(Lang.trim())) {
+			localStorage.setItem('Lang', Lang.trim());
+			location.reload();
+		}
 		return;
 	}
 	if (key == 'SHIFT|ESC') { key = 'SHIFT|OEM_3';  }
@@ -213,6 +342,168 @@ function SendKeyPress(key) {
         };
         xhr.send();
     });
+}
+
+function SendRemoteCommand(cmd) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', Server + '/keypress?key=' + encodeURIComponent(cmd), true);
+    xhr.send();
+}
+
+function FlushMouseMove() {
+    const now = Date.now();
+    const dt = (now - LastFlushTime) || MOUSE_FLUSH_INTERVAL;
+    LastFlushTime = now;
+
+    if (PendingDx === 0 && PendingDy === 0) return;
+
+    // нормализуем накопленное смещение к номинальному интервалу — так скорость
+    // курсора не зависит от того, как часто реально стреляли touchmove-события
+    let normFactor = MOUSE_FLUSH_INTERVAL / dt;
+    if (normFactor > 3) normFactor = 3; // защита от скачка при дрожании таймера сразу после рестарта
+    const nx = PendingDx * normFactor;
+    const ny = PendingDy * normFactor;
+    PendingDx = 0;
+    PendingDy = 0;
+
+    const outX = Math.round(MouseAcceleration(nx));
+    const outY = Math.round(MouseAcceleration(ny));
+    if (outX !== 0 || outY !== 0)
+        SendRemoteCommand('MOUSEMOVE:' + -outY + ':' + outX); // перевернуты
+}
+
+function ApplyMode() {
+    if (CurrentMode == RemoteMode) {
+        KeyboardDiv.style.display = 'none';
+        RemoteDiv.style.display = 'flex';
+    } else {
+        RemoteDiv.style.display = 'none';
+        KeyboardDiv.style.display = 'flex';
+    }
+}
+
+function ToggleMode() {
+    CurrentMode = CurrentMode == KeyboardMode ? RemoteMode : KeyboardMode;
+	localStorage.setItem('CurrentMode', CurrentMode);
+	ApplyMode();
+}
+
+function UpdateDpadView() {
+    const arrows = document.querySelectorAll('.dpad-arrow');
+    arrows.forEach(a => a.style.display = TouchpadMode ? 'none' : 'flex');
+    document.getElementById('dpadCenter').innerHTML = TouchpadMode ? '' : 'Enter';
+}
+
+function MouseAcceleration(value) {
+	let sign = value < 0 ? -1 : 1;
+	value = Math.abs(value);
+
+	// базовая чувствительность
+	let result = Math.pow(value, 1.35) * MouseSensitivity;
+
+	// ограничение максимальной скорости
+	if (result > 200)
+		result = 200;
+
+	return sign * result;
+}
+
+function InitRemote() {
+    RemoteDiv = document.getElementById('remote');
+
+    document.querySelectorAll('#remote [data-cmd]').forEach(el => {
+        el.onclick = () => SendRemoteCommand(el.getAttribute('data-cmd'));
+    });
+
+    document.getElementById('touchpadModeBtn').onclick = () => {
+        TouchpadMode = !TouchpadMode;
+		localStorage.setItem('TouchpadMode', TouchpadMode);
+        UpdateDpadView();
+    };
+    document.getElementById('backToKeyboardBtn').onclick = ToggleMode;
+
+    const dpadCenter = document.getElementById('dpadCenter');
+    dpadCenter.onclick = () => {
+        if (!TouchpadMode) SendRemoteCommand('ENTER');
+    };
+    ['n', 's', 'w', 'e'].forEach((dir, i) => {
+        const keys = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
+        document.querySelector('.dpad-arrow.' + dir).onclick = () => {
+            if (!TouchpadMode) SendRemoteCommand(keys[i]);
+        };
+    });
+
+    const dpad = document.getElementById('dpad');
+    dpad.addEventListener('touchstart', function(e) {
+        if (!TouchpadMode) return;
+        LastTouchX = e.touches[0].clientX;
+        LastTouchY = e.touches[0].clientY;
+        TouchMoved = false;
+        JustStarted = true;
+        PendingDx = 0;
+        PendingDy = 0;
+        LastFlushTime = Date.now();
+        if (MouseMoveTimer) clearInterval(MouseMoveTimer);
+        MouseMoveTimer = setInterval(FlushMouseMove, MOUSE_FLUSH_INTERVAL);
+    }, {passive: true});
+    dpad.addEventListener('touchmove', function(e) {
+        if (!TouchpadMode) return;
+        const x = e.touches[0].clientX;
+        const y = e.touches[0].clientY;
+        const dx = x - LastTouchX;
+        const dy = y - LastTouchY;
+        LastTouchX = x;
+        LastTouchY = y;
+        if (JustStarted) {
+            // первое движение после касания часто прилетает одним "скачком"
+            // (браузер проглатывает начальный слоп) — просто синхронизируем
+            // позицию, не отправляя эту дельту курсору
+            JustStarted = false;
+            return;
+        }
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) TouchMoved = true;
+        PendingDx += dx;
+        PendingDy += dy;
+    }, {passive: true});
+    function StopMouseMoveTimer() {
+        if (MouseMoveTimer) {
+            clearInterval(MouseMoveTimer);
+            MouseMoveTimer = null;
+        }
+        JustStarted = false;
+        PendingDx = 0;
+        PendingDy = 0;
+    }
+    dpad.addEventListener('touchend', function(e) {
+        if (!TouchpadMode) { StopMouseMoveTimer(); return; }
+        StopMouseMoveTimer();
+        if (!TouchMoved) SendRemoteCommand('MOUSECLICK');
+    });
+    dpad.addEventListener('touchcancel', function(e) {
+        StopMouseMoveTimer();
+    });
+
+    const scrollpad = document.getElementById('scrollpad');
+    scrollpad.addEventListener('touchstart', function(e) {
+        LastScrollY = e.touches[0].clientX;
+        ScrollAccum = 0;
+    }, {passive: true});
+	scrollpad.addEventListener('touchmove', function(e) {
+		const y = e.touches[0].clientX;
+		const dy = LastScrollY - y;
+		LastScrollY = y;
+		const accelDy = MouseAcceleration(dy);
+		ScrollAccum += accelDy;
+		while (Math.abs(ScrollAccum) >= ScrollThreshold) {
+			const notch = ScrollAccum > 0 ? 1 : -1;
+			SendRemoteCommand('SCROLL:' + notch);
+			ScrollAccum -= notch * ScrollThreshold;
+		}
+}, {passive: true});
+	scrollpad.addEventListener('touchend', function(e) {
+		ScrollAccum = 0;
+	});
+    UpdateDpadView();
 }
 
 function CheckOrientation() {
@@ -257,19 +548,28 @@ function ShowLayout() {
             button.onclick = () => SendKeyPress(key);
             rowDiv.appendChild(button);
         });
+        if (rowIndex == 4) {
+            const modeBtn = document.createElement('div');
+            modeBtn.classList.add('button');
+            modeBtn.innerHTML = '<img src="images/remote_control.png">';
+            modeBtn.style.width = 30 * ButtonsWidthMul + 'px';
+            modeBtn.onclick = ToggleMode;
+            rowDiv.insertBefore(modeBtn, rowDiv.children[4]); // перед пробелом
+        }
         KeyboardDiv.appendChild(rowDiv);
     });
 }
 
 document.addEventListener('DOMContentLoaded', function(){
+	KeyboardDiv = document.getElementById('keyboard');
 
 	if (localStorage.getItem('Lang') == null) {
 		let lang = navigator.language.toLowerCase();
 
 		if (lang.startsWith('ru')) CustomLang = 'ru';
-		else if (lang.startsWith('zh')) CustomLang = 'zh';
+		else if (lang.startsWith('zh')) CustomLang = (lang.includes('tw') || lang.includes('hant') || lang.includes('hk') || lang.includes('mo')) ? 'zh-tw' : 'zh-cn';
 		else if (lang.startsWith('es')) CustomLang = 'es';
-		else if (lang.startsWith('pt')) CustomLang = 'pt';
+		else if (lang.startsWith('pt')) CustomLang = 'pt-br';
 		else if (lang.startsWith('fr')) CustomLang = 'fr';
 		else if (lang.startsWith('de')) CustomLang = 'de';
 		else if (lang.startsWith('ja')) CustomLang = 'ja';
@@ -284,28 +584,85 @@ document.addEventListener('DOMContentLoaded', function(){
 		CurrentLayoutLang = CustomLang;
 		IDS_ENTER_ADDRESS = LangStrings[CustomLang][0];
 		IDS_ENTER_LANG = LangStrings[CustomLang][1];
-		IDS_HELP = LangStrings[CustomLang][2];
+		IDS_ENTER_MOUSE_SENSITIVITY = LangStrings[CustomLang][2];
+		IDS_HELP = LangStrings[CustomLang][3];
 	}
-
-	KeyboardDiv = document.getElementById('keyboard');
-
-	if (IsAndroid) { 
-		if (localStorage.getItem('Server') != null)
-			Server = localStorage.getItem('Server');
+	
+	if (localStorage.getItem('TouchpadMode') != null)
+		TouchpadMode = localStorage.getItem('TouchpadMode') === 'true';
+	
+	UpdateCurrentLang();
+	ShowLayout();
+	InitRemote();
+	
+	if (localStorage.getItem('MouseSensitivity') != null)
+		MouseSensitivity = parseFloat(localStorage.getItem('MouseSensitivity'));
+		
+	if (localStorage.getItem('CurrentMode') != null)
+		CurrentMode = parseInt(localStorage.getItem('CurrentMode'));
+	ApplyMode();
+	
+	if (IsAndroid) {
+		setTimeout(() => {
+			if (localStorage.getItem('Server') != null)
+				Server = localStorage.getItem('Server')
+			else {
+				Server = prompt(IDS_ENTER_ADDRESS, 'http://192.168.0.1:7533');
+				if (Server) localStorage.setItem('Server', Server.trim());
+				}
+		}, 500);
+			
 	} else { // для iOS
 		CheckOrientation();
 		window.addEventListener('resize', function() {
 			CheckOrientation();
 			ShowLayout();
+			ApplyMode();
 		});
 	}
-	
-	UpdateCurrentLang();
-	ShowLayout();
 });
 </script>
 </head>
 <body ontouchstart="">
     <div id="keyboard"></div>
+    <div id="remote">
+        <div class="remote-row">
+			<div class="round-btn" data-cmd="MEDIA_PREV">⏮</div>
+			<div class="round-btn" data-cmd="MEDIA_NEXT">⏭</div>
+			<div class="round-btn" data-cmd="MEDIA_PLAY_PAUSE">⏯</div>
+        </div>
+        <div class="remote-row">
+            <div class="round-btn" style="font-size:12px" data-cmd="CLOSE_APP"><img src="images/close.png"></div>
+            <div class="round-btn" style="font-size:13px" data-cmd="DELETE">DEL</div>
+            <div class="round-btn" style="font-size:18px" data-cmd="BROWSER_REFRESH"><span style="transform:translateY(-1px)">↻</span></div>
+        </div>
+        <div class="remote-row">
+            <div class="round-btn" data-cmd="NEXT_APP"><img src="images/apps.png"></div>
+			<div class="round-btn" style="font-size:10px" data-cmd="ENTER">ENTER</div>
+            <div class="round-btn" style="font-size:13px" data-cmd="ESC">ESC</div>
+        </div>
+        <div class="dpad-row">
+			<div id="scrollpad-dummy"></div>
+            <div id="dpad">
+                <div class="dpad-arrow n">↑</div>
+                <div class="dpad-arrow s">↓</div>
+                <div class="dpad-arrow w">←</div>
+                <div class="dpad-arrow e">→</div>
+                <div class="dpad-center" id="dpadCenter">Enter</div>
+            </div>
+            <div id="scrollpad"><div class="scrollpad-icon">⇕</div></div>
+        </div>
+		
+        <div class="remote-row">
+            <div class="round-btn" data-cmd="BACKSPACE">⌫</div>
+            <div class="round-btn" id="touchpadModeBtn"><img src="images/mouse.png"></div>
+            <div class="round-btn" data-cmd="CONTEXT_MENU">☰</div>
+        </div>
+        <div class="remote-row">
+            <div class="round-btn" id="backToKeyboardBtn">⌨</div>
+            <div class="round-btn" data-cmd="VOLUME_DOWN">-</div>
+            <div class="round-btn" data-cmd="VOLUME_UP">+</div>
+        </div>
+    </div>
 </body>
 </html>
