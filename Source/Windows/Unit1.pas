@@ -63,6 +63,7 @@ var
   AllowAnyIPs, BlockReqNewDevs: boolean;
   IPSMemoChanged: boolean = false;
   AppPath: string;
+  MouseLeftButtonPressed: boolean = false;
 
   IDS_DEV_SYNC_CONFIRM, IDS_ABOUT, IDS_LAST_UPDATE: string;
 
@@ -125,6 +126,18 @@ begin
   mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 end;
 
+procedure EmulateMouseDown;
+begin
+  mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+  MouseLeftButtonPressed:=true;
+end;
+
+procedure EmulateMouseUp;
+begin
+  mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+  MouseLeftButtonPressed:=false;
+end;
+
 procedure EmulateKeyPress(Key: string);
 const
   VK_OEM_1 = $BA; // ';:' для US раскладки
@@ -149,6 +162,8 @@ var
   KeyCode: Word;
   CtrlPressed, AltPressed, ShiftPressed: boolean;
 begin
+  if MouseLeftButtonPressed then EmulateMouseUp;
+  KeyCode:=0;
   CtrlPressed:=Pos('CTRL|', Key) > 0;
   AltPressed:=Pos('ALT|', Key) > 0;
   ShiftPressed:=Pos('SHIFT|', Key) > 0;
@@ -225,8 +240,10 @@ begin
   if ShiftPressed then keybd_event(VK_SHIFT, 0, 0, 0);   // Нажатие клавиши
 
   // Основная клавиша
-  keybd_event(KeyCode, 0, 0, 0);   // Нажатие клавиши
-  keybd_event(KeyCode, 0, KEYEVENTF_KEYUP, 0); // Отпускание клавиши
+  if KeyCode <> 0 then begin
+    keybd_event(KeyCode, 0, 0, 0);   // Нажатие клавиши
+    keybd_event(KeyCode, 0, KEYEVENTF_KEYUP, 0); // Отпускание клавиши
+  end;
 
   // Отпускание модификатора
   if CtrlPressed then keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
@@ -279,6 +296,10 @@ begin
         EmulateScroll(KeyValue)
       else if KeyValue = 'MOUSECLICK' then
         EmulateMouseClick
+      else if KeyValue = 'MOUSEDOWN' then
+        EmulateMouseDown
+      else if KeyValue = 'MOUSEUP' then
+        EmulateMouseUp
       else
         EmulateKeyPress(KeyValue);
     end;
@@ -460,8 +481,8 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Caption + ' 1.1' + #13#10 +
-  IDS_LAST_UPDATE + ' 11.09.26' + #13#10 +
+  Application.MessageBox(PChar(Caption + ' 1.2' + #13#10 +
+  IDS_LAST_UPDATE + ' 18.09.26' + #13#10 +
   'https://r57zone.github.io' + #13#10 +
   'r57zone@gmail.com'), PChar(IDS_ABOUT), MB_ICONINFORMATION);
 end;

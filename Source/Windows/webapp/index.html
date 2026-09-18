@@ -41,7 +41,7 @@ body {
 	align-items: center;
 	text-align: center;
 	padding:0;
-	flex: 1 1 auto;
+	flex: 1 1 0;
 	height: calc(10vh - 6px);
 	margin: 1px;
 	font-size: 11px;
@@ -56,7 +56,7 @@ body {
 
 #remote {
 	position: fixed;
-	right: 130px;
+	right: 140px;
 	top: 50%;
 	box-sizing: border-box;
 	display: none;
@@ -64,6 +64,12 @@ body {
 	align-items: center;
 	justify-content: center;
 	transform: translateY(calc(-50%)) rotate(-90deg);
+}
+#remoteClock {
+	font-size: 18px;
+	color: #3f3f3f;
+	margin-bottom: 10px;
+	letter-spacing: 1px;
 }
 .remote-row {
 	display: flex;
@@ -97,6 +103,10 @@ body {
 	border-radius: 50%;
 	background-color: #f8f8f8;
 	position: relative;
+	transition: background-color 0.1s ease;
+}
+#dpad.dragging {
+	background-color: #0098d2;
 }
 #scrollpad {
 	width: 46px;
@@ -174,7 +184,6 @@ let CustomLang = 'en';
 let CurrentLayoutLang = CustomLang;
 let CurrentLayout;
 let CurrentLayoutShift;
-let ButtonsWidthMul = 1;
 let MouseSensitivity = 1.3;
 
 let IsAndroid = false;
@@ -192,6 +201,12 @@ let MouseMoveTimer = null;
 const MOUSE_FLUSH_INTERVAL = 16; // мс, целевой интервал отправки (~60 Гц)
 let LastScrollY = 0, ScrollAccum = 0;
 const ScrollThreshold = 30; // px of swipe per one wheel notch
+
+// Long-press-to-drag (зажатие ЛКМ для перетаскивания)
+let DragHoldTimer = null;
+let DragActive = false;
+const DRAG_HOLD_DELAY = 350; // мс до срабатывания зажатия
+const DRAG_MOVE_TOLERANCE = 3; // px, порог движения, отменяющий зажатие
 
 const EnLayout = [
 	['ESC', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'OEM_MINUS', 'OEM_PLUS', 'BACKSPACE'],
@@ -445,6 +460,17 @@ function InitRemote() {
         LastFlushTime = Date.now();
         if (MouseMoveTimer) clearInterval(MouseMoveTimer);
         MouseMoveTimer = setInterval(FlushMouseMove, MOUSE_FLUSH_INTERVAL);
+
+        if (DragHoldTimer) clearTimeout(DragHoldTimer);
+        DragActive = false;
+        DragHoldTimer = setTimeout(function() {
+            DragHoldTimer = null;
+            DragActive = true;
+            TouchMoved = true; // палец лежал на месте — это не тап, клик по touchend не нужен
+            if (navigator.vibrate) navigator.vibrate(15);
+            dpad.classList.add('dragging');
+            SendRemoteCommand('MOUSEDOWN');
+        }, DRAG_HOLD_DELAY);
     }, {passive: true});
     dpad.addEventListener('touchmove', function(e) {
         if (!TouchpadMode) return;
@@ -456,12 +482,17 @@ function InitRemote() {
         LastTouchY = y;
         if (JustStarted) {
             // первое движение после касания часто прилетает одним "скачком"
-            // (браузер проглатывает начальный слоп) — просто синхронизируем
+            // (браузер проглатывает начальный слоп) - просто синхронизируем
             // позицию, не отправляя эту дельту курсору
             JustStarted = false;
             return;
         }
         if (Math.abs(dx) > 2 || Math.abs(dy) > 2) TouchMoved = true;
+        // реальное движение раньше срабатывания таймера - это обычный свайп, а не зажатие
+        if (DragHoldTimer && (Math.abs(dx) > DRAG_MOVE_TOLERANCE || Math.abs(dy) > DRAG_MOVE_TOLERANCE)) {
+            clearTimeout(DragHoldTimer);
+            DragHoldTimer = null;
+        }
         PendingDx += dx;
         PendingDy += dy;
     }, {passive: true});
@@ -474,13 +505,32 @@ function InitRemote() {
         PendingDx = 0;
         PendingDy = 0;
     }
+    function EndDragHold() {
+        if (DragHoldTimer) {
+            clearTimeout(DragHoldTimer);
+            DragHoldTimer = null;
+        }
+        if (DragActive) {
+            DragActive = false;
+            dpad.classList.remove('dragging');
+            SendRemoteCommand('MOUSEUP');
+            return true;
+        }
+        return false;
+    }
     dpad.addEventListener('touchend', function(e) {
         if (!TouchpadMode) { StopMouseMoveTimer(); return; }
         StopMouseMoveTimer();
-        if (!TouchMoved) SendRemoteCommand('MOUSECLICK');
+        const wasDragging = EndDragHold();
+        if (!wasDragging && !TouchMoved) SendRemoteCommand('MOUSECLICK');
     });
     dpad.addEventListener('touchcancel', function(e) {
         StopMouseMoveTimer();
+        EndDragHold();
+    });
+    // Подстраховка: если приложение свернули посреди зажатия, не оставляем ЛКМ "залипшей"
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) EndDragHold();
     });
 
     const scrollpad = document.getElementById('scrollpad');
@@ -506,10 +556,6 @@ function InitRemote() {
     UpdateDpadView();
 }
 
-function CheckOrientation() {
-	ButtonsWidthMul = window.matchMedia("(orientation: portrait)").matches ? 0.3 : 1;
-}
-
 function ShowLayout() {
     KeyboardDiv.innerHTML = '';
     EnLayout.forEach((rowKeys, rowIndex) => {
@@ -523,26 +569,26 @@ function ShowLayout() {
 			else
 				button.innerHTML = CurrentLayoutShift[rowIndex][keyIndex];
 			if (rowIndex == 0) {
-				if (keyIndex == 0) button.style.width = 40 * ButtonsWidthMul + 'px'; // Esc
-				if (keyIndex == 13) button.style.width = 60 * ButtonsWidthMul + 'px'; // Backspace
+				if (keyIndex == 0) button.style.flexGrow = 1.25; // Escape
+				else if (keyIndex == 13) button.style.flexGrow = 1.75; // Backspace
 			} else if (rowIndex == 1) {
-				if (keyIndex == 0) button.style.width = 60 * ButtonsWidthMul + 'px'; // Tab
-				if (keyIndex == 13) button.style.width = 40 * ButtonsWidthMul + 'px'; // \
+				if (keyIndex == 0) button.style.flexGrow = 1.5; // Tab
+				else if (keyIndex == 13) button.style.flexGrow = 1.5; // \
 			} else if (rowIndex == 2) {
-				if (keyIndex == 0) button.style.width = 80 * ButtonsWidthMul + 'px'; // Caps Lock
-				if (keyIndex == 12) button.style.width = 80 * ButtonsWidthMul + 'px'; // Enter
+				if (keyIndex == 0) button.style.flexGrow = 2; // Caps Lock
+				else if (keyIndex == 12) button.style.flexGrow = 2; // Enter
 			} else if (rowIndex == 3) {
-				if (keyIndex == 0) button.style.width = 90 * ButtonsWidthMul + 'px'; // Shift
-				if (keyIndex == 11) button.style.width = 90 * ButtonsWidthMul + 'px'; // Shift
+				if (keyIndex == 0) button.style.flexGrow = 2.5; // Shift (левый)
+				else if (keyIndex == 11) button.style.flexGrow = 2.5; // Shift (правый)
 			} else if (rowIndex == 4) {
-				// Win
-				if (keyIndex == 1) {
-					button.style.width = 10 * ButtonsWidthMul + 'px';
-					button.innerHTML = '<img src="images/win.png">';
-				} 
-				if (keyIndex == 4) button.style.width = 170 * ButtonsWidthMul + 'px'; // Space
-				// LANG
-				if (keyIndex == 3) button.innerHTML = '<img src="images/lang.png">';
+				// Ctrl, Win, Alt, Lang
+				if (keyIndex == 0 || keyIndex == 1 || keyIndex == 2 || keyIndex == 3) button.style.flexGrow = 1.0;
+				else if (keyIndex == 4) button.style.flexGrow = 5; // Space
+				else if (keyIndex == 9) button.style.flexGrow = 1.0; // Delete
+				
+				// Icons
+				if (keyIndex == 1) button.innerHTML = '<img src="images/win.png">'; // Win
+				else if (keyIndex == 3) button.innerHTML = '<img src="images/lang.png">'; // Lang
 			}
             button.alt = key;
             button.onclick = () => SendKeyPress(key);
@@ -552,7 +598,6 @@ function ShowLayout() {
             const modeBtn = document.createElement('div');
             modeBtn.classList.add('button');
             modeBtn.innerHTML = '<img src="images/remote_control.png">';
-            modeBtn.style.width = 30 * ButtonsWidthMul + 'px';
             modeBtn.onclick = ToggleMode;
             rowDiv.insertBefore(modeBtn, rowDiv.children[4]); // перед пробелом
         }
@@ -560,8 +605,18 @@ function ShowLayout() {
     });
 }
 
+function UpdateRemoteClock() {
+	const now = new Date();
+	const hh = String(now.getHours()).padStart(2, '0');
+	const mm = String(now.getMinutes()).padStart(2, '0');
+	document.getElementById('remoteClock').textContent = hh + ':' + mm;
+}
+
 document.addEventListener('DOMContentLoaded', function(){
 	KeyboardDiv = document.getElementById('keyboard');
+
+	UpdateRemoteClock();
+	setInterval(UpdateRemoteClock, 1000);
 
 	if (localStorage.getItem('Lang') == null) {
 		let lang = navigator.language.toLowerCase();
@@ -613,9 +668,7 @@ document.addEventListener('DOMContentLoaded', function(){
 		}, 500);
 			
 	} else { // для iOS
-		CheckOrientation();
 		window.addEventListener('resize', function() {
-			CheckOrientation();
 			ShowLayout();
 			ApplyMode();
 		});
@@ -626,6 +679,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <body ontouchstart="">
     <div id="keyboard"></div>
     <div id="remote">
+        <div id="remoteClock"></div>
         <div class="remote-row">
 			<div class="round-btn" data-cmd="MEDIA_PREV">⏮</div>
 			<div class="round-btn" data-cmd="MEDIA_NEXT">⏭</div>

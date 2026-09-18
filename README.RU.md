@@ -3,8 +3,8 @@
 # PCRemKey
 Управление ПК с помощью клавиатуры и пульта для Android и iOS.
 
-[![](https://github.com/user-attachments/assets/ae2c8acb-0400-41cb-836a-5a27656ccbe0)](https://github.com/user-attachments/assets/2b29fc41-4b52-4153-9363-845533b1ef66)
-[![](https://github.com/user-attachments/assets/be79c1e3-6387-4b57-8680-e8500052ee70)](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)
+[![](https://github.com/user-attachments/assets/4922111e-bfa5-4c36-bca6-4312dc51dbd9)](https://github.com/user-attachments/assets/376724d8-d9e7-498c-91e0-76cd75e4d721)
+[![](https://github.com/user-attachments/assets/85f0e97c-ef3e-4caf-9956-e96d427d3a0c)](https://github.com/user-attachments/assets/aa136cd4-be52-4b44-925d-c76ea312481f)
 ## Особенности
 Поддерживаются следующие языки: английский, русский, китайский (упрощенный и традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
 

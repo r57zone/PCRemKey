@@ -5,8 +5,8 @@
 # PCRemKey
 Control your PC using a keyboard and a remote control for Android and iOS.
 
-[![](https://github.com/user-attachments/assets/e589b0a0-836f-4e37-b4ca-e1e18ca0a136)](https://github.com/user-attachments/assets/8cb3b709-569d-4959-a4fa-092b42d328be)
-[![](https://github.com/user-attachments/assets/be79c1e3-6387-4b57-8680-e8500052ee70)](https://github.com/user-attachments/assets/0851fabf-745d-495e-97f1-061f10216f87)
+[![](https://github.com/user-attachments/assets/63980a44-06a0-4660-a39d-1650fd5f7f3c)](https://github.com/user-attachments/assets/dfa1dc97-f926-4399-926f-e58f72258b5d)
+[![](https://github.com/user-attachments/assets/85f0e97c-ef3e-4caf-9956-e96d427d3a0c)](https://github.com/user-attachments/assets/aa136cd4-be52-4b44-925d-c76ea312481f)
 
 ## Features
 The following languages ​​are supported: English, Russian, Chinese (Simplified and Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
