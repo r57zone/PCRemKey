@@ -5,11 +5,12 @@
 # PCRemKey
 Control your PC using a keyboard and a remote control for Android and iOS.
 
-[![](https://github.com/user-attachments/assets/63980a44-06a0-4660-a39d-1650fd5f7f3c)](https://github.com/user-attachments/assets/dfa1dc97-f926-4399-926f-e58f72258b5d)
-[![](https://github.com/user-attachments/assets/85f0e97c-ef3e-4caf-9956-e96d427d3a0c)](https://github.com/user-attachments/assets/aa136cd4-be52-4b44-925d-c76ea312481f)
+[![](https://github.com/user-attachments/assets/9fd816b1-95a2-4009-b70d-84258a79ef62)](https://github.com/user-attachments/assets/262b032a-6fa1-488b-876c-33247900117d)
+[![](https://github.com/user-attachments/assets/2470ef79-9d7a-4382-b43f-24d6b4aec0ae)](https://github.com/user-attachments/assets/d16d3572-a600-4192-a406-362e4e22a69a)
+[![](https://github.com/user-attachments/assets/0933acf6-5beb-47b5-8e60-0e1cc7ace33c)](https://github.com/user-attachments/assets/a0bcb4fd-8b14-4918-89b5-ea611c18690b)
 
 ## Features
-The following languages ​​are supported: English, Russian, Chinese (Simplified and Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
+The following languages ​​are supported: English, Russian, Chinese (Simplified/Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
 
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)

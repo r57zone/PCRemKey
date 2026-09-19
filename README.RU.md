@@ -3,10 +3,12 @@
 # PCRemKey
 Управление ПК с помощью клавиатуры и пульта для Android и iOS.
 
-[![](https://github.com/user-attachments/assets/4922111e-bfa5-4c36-bca6-4312dc51dbd9)](https://github.com/user-attachments/assets/376724d8-d9e7-498c-91e0-76cd75e4d721)
-[![](https://github.com/user-attachments/assets/85f0e97c-ef3e-4caf-9956-e96d427d3a0c)](https://github.com/user-attachments/assets/aa136cd4-be52-4b44-925d-c76ea312481f)
+[![](https://github.com/user-attachments/assets/d1b485ed-429b-482a-b272-b0d12a304974)](https://github.com/user-attachments/assets/d66860c5-c9e6-4b8d-afda-eedfc415f0cc)
+[![](https://github.com/user-attachments/assets/2470ef79-9d7a-4382-b43f-24d6b4aec0ae)](https://github.com/user-attachments/assets/d16d3572-a600-4192-a406-362e4e22a69a)
+[![](https://github.com/user-attachments/assets/0933acf6-5beb-47b5-8e60-0e1cc7ace33c)](https://github.com/user-attachments/assets/a0bcb4fd-8b14-4918-89b5-ea611c18690b)
+
 ## Особенности
-Поддерживаются следующие языки: английский, русский, китайский (упрощенный и традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
+Поддерживаются следующие языки: английский, русский, китайский (упрощенный/традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
 
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)

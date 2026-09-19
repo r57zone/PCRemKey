@@ -51,7 +51,7 @@ body {
 	color: #f8f8f8;
 	outline: none;
 }
-.button:active{background-color:#0098d2;}
+.button:active{background-color:#4d4d4d;}
 .button img{max-width:10px; max-height:10px;}
 
 #remote {
@@ -88,7 +88,7 @@ body {
 	justify-content: center;
 	font-size: 16px;
 }
-.round-btn:active { background-color: #0098d2; }
+.round-btn:active { background-color: #4d4d4d; }
 .round-btn img{max-width:100%; max-height:100%;}
 .dpad-row {
 	display: flex;
@@ -101,12 +101,12 @@ body {
 	width: 180px;
 	height: 180px;
 	border-radius: 50%;
-	background-color: #f8f8f8;
+	background-color: #333333;
 	position: relative;
 	transition: background-color 0.1s ease;
 }
 #dpad.dragging {
-	background-color: #0098d2;
+	background-color: #4d4d4d;
 }
 #scrollpad {
 	width: 46px;
@@ -124,7 +124,6 @@ body {
 	height: 180px;
 	position: relative;
 }
-#scrollpad:active { background-color: #0098d2; }
 .scrollpad-icon {
 	color: #f8f8f8;
 	font-size: 18px;
@@ -147,7 +146,7 @@ body {
 }
 .dpad-arrow {
 	position: absolute;
-	color: #1a1a1a;
+	color: #f8f8f8;
 	font-size: 22px;
 	width: 30px;
 	height: 30px;
@@ -169,7 +168,7 @@ body {
 		font-size: 16px;
 		margin: 3px;
     }
-	.button img{max-width:20px; max-height:20px;}
+	.button img{max-width:18px; max-height:18px;}
 }
 </style>
 <script src="layouts.js"></script>
@@ -407,6 +406,7 @@ function UpdateDpadView() {
     const arrows = document.querySelectorAll('.dpad-arrow');
     arrows.forEach(a => a.style.display = TouchpadMode ? 'none' : 'flex');
     document.getElementById('dpadCenter').innerHTML = TouchpadMode ? '' : 'Enter';
+    document.getElementById('dpadCenter').style.display = TouchpadMode ? 'none' : 'flex';
 }
 
 function MouseAcceleration(value) {
@@ -597,7 +597,7 @@ function ShowLayout() {
         if (rowIndex == 4) {
             const modeBtn = document.createElement('div');
             modeBtn.classList.add('button');
-            modeBtn.innerHTML = '<img src="images/remote_control.png">';
+            modeBtn.innerHTML = '<img style="max-width:23px; max-height:23px;" src="images/remote_control.png">';
             modeBtn.onclick = ToggleMode;
             rowDiv.insertBefore(modeBtn, rowDiv.children[4]); // перед пробелом
         }
