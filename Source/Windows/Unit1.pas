@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
-  IdHTTPServer, StdCtrls, ShellAPI, Menus, IniFiles, XPMan;
+  IdHTTPServer, StdCtrls, ShellAPI, Menus, IniFiles, XPMan, WinSock;
 
 type
   TMain = class(TForm)
@@ -42,6 +42,7 @@ type
     procedure AllowAnyIPsCBClick(Sender: TObject);
     procedure AllowedIPsMemoChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure IdHTTPServerConnect(AThread: TIdPeerThread);
   private
     procedure DefaultHandler(var Message); override;
     { Private declarations }
@@ -196,12 +197,30 @@ begin
   if Key = 'WIN' then KeyCode:=VK_LWIN else
   if Key = 'ALT' then KeyCode:=VK_MENU else
   if Key = 'SPACE' then KeyCode:=VK_SPACE else
-  if Key = 'LANG' then begin keybd_event(VK_SHIFT, 0, 0, 0); keybd_event(VK_MENU, 0, 0, 0); keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0); keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0); end else
+  if Key = 'LANG' then begin
+    keybd_event(VK_SHIFT, 0, 0, 0);
+    keybd_event(VK_MENU, 0, 0, 0);
+    keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0);
+    keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
+  end else
   if Key = 'LEFT' then KeyCode:=VK_LEFT else
   if Key = 'UP' then KeyCode:=VK_UP else
   if Key = 'DOWN' then KeyCode:=VK_DOWN else
   if Key = 'RIGHT' then KeyCode:=VK_RIGHT else
   if Key = 'DELETE' then KeyCode:=VK_DELETE else
+  if Key = 'PRTSCR' then KeyCode:=VK_SNAPSHOT else // PrtScr (с ALT| - активное окно)
+  if Key = 'F1' then KeyCode:=VK_F1 else
+  if Key = 'F2' then KeyCode:=VK_F2 else
+  if Key = 'F3' then KeyCode:=VK_F3 else
+  if Key = 'F4' then KeyCode:=VK_F4 else
+  if Key = 'F5' then KeyCode:=VK_F5 else
+  if Key = 'F6' then KeyCode:=VK_F6 else
+  if Key = 'F7' then KeyCode:=VK_F7 else
+  if Key = 'F8' then KeyCode:=VK_F8 else
+  if Key = 'F9' then KeyCode:=VK_F9 else
+  if Key = 'F10' then KeyCode:=VK_F10 else
+  if Key = 'F11' then KeyCode:=VK_F11 else
+  if Key = 'F12' then KeyCode:=VK_F12 else
 
   if Key = 'CONTEXT_MENU' then begin
     mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
@@ -249,6 +268,19 @@ begin
   if CtrlPressed then keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
   if AltPressed then keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0);
   if ShiftPressed then keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
+end;
+
+procedure TMain.IdHTTPServerConnect(AThread: TIdPeerThread);
+var
+  NoDelay: Integer;
+begin
+  // Отключаем алгоритм Нэйгла (TCP_NODELAY). Indy отправляет заголовок и тело ответа
+  // двумя отдельными записями, и без этого вторая ждёт ACK от телефона (задержка до 40-200 мс на запрос)
+  NoDelay:=1;
+  try
+    setsockopt(AThread.Connection.Socket.Binding.Handle, IPPROTO_TCP, TCP_NODELAY, PChar(@NoDelay), SizeOf(NoDelay));
+  except
+  end;
 end;
 
 procedure TMain.IdHTTPServerCommandGet(AThread: TIdPeerThread;
@@ -340,7 +372,9 @@ begin
     Wnd:=Main.Handle;
     uId:=1;
     uFlags:=NIF_MESSAGE or NIF_ICON or NIF_TIP;
+    //hIcon:=Application.Icon.Handle;
     hIcon:=SendMessage(Main.Handle, WM_GETICON, ICON_SMALL2, 0);
+    //hIcon:=Main.Icon.Handle;
     uCallBackMessage:=WM_USER + 1;
     StrCopy(szTip, PChar(Application.Title));
   end;
@@ -365,6 +399,7 @@ var
   Ini: TIniFile;
 begin
   Application.Title:=Caption;
+  IdHTTPServer.OnConnect:=IdHTTPServerConnect;
   WM_TASKBARCREATED:=RegisterWindowMessage('TaskbarCreated');
   AppPath:=ExtractFilePath(ParamStr(0));
   //SetWindowLong(Application.Handle, GWL_EXSTYLE, GetWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);
@@ -438,6 +473,7 @@ end;}
 
 procedure TMain.FormDestroy(Sender: TObject);
 begin
+  IdHTTPServer.Active:=false;
   AllowClose:=true;
   AllowedIPs.Free;
   Tray(TrayDelete);
@@ -481,9 +517,9 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-  Application.MessageBox(PChar(Caption + ' 1.2' + #13#10 +
-  IDS_LAST_UPDATE + ' 18.09.26' + #13#10 +
-  'https://r57zone.github.io' + #13#10 +
+  Application.MessageBox(PChar(Caption + ' 1.3' + #13#10 +
+  IDS_LAST_UPDATE + ' 20.11.26' + #13#10 +
+  'https://github.com/r57zone' + #13#10 +
   'r57zone@gmail.com'), PChar(IDS_ABOUT), MB_ICONINFORMATION);
 end;
 

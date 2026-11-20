@@ -1,15 +1,13 @@
 [![EN](https://user-images.githubusercontent.com/9499881/33184537-7be87e86-d096-11e7-89bb-f3286f752bc6.png)](https://github.com/r57zone/PCRemKey/) 
 [![RU](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)](https://github.com/r57zone/PCRemKey/blob/master/README.RU.md) 
 # PCRemKey
-Управление ПК с помощью клавиатуры и пульта для Android и iOS.
+Управление ПК с помощью смартфона на Android или iOS.
 
-[![](https://github.com/user-attachments/assets/d1b485ed-429b-482a-b272-b0d12a304974)](https://github.com/user-attachments/assets/d66860c5-c9e6-4b8d-afda-eedfc415f0cc)
-[![](https://github.com/user-attachments/assets/2470ef79-9d7a-4382-b43f-24d6b4aec0ae)](https://github.com/user-attachments/assets/d16d3572-a600-4192-a406-362e4e22a69a)
-[![](https://github.com/user-attachments/assets/0933acf6-5beb-47b5-8e60-0e1cc7ace33c)](https://github.com/user-attachments/assets/a0bcb4fd-8b14-4918-89b5-ea611c18690b)
+[![](https://github.com/user-attachments/assets/9a700d76-ddb8-4ffc-a642-54541c0857d6)](https://github.com/user-attachments/assets/16321821-726c-472d-b058-fe7cc488f5d0)
+[![](https://github.com/user-attachments/assets/09996b8c-8968-4085-9484-b6702e98e6ff)](https://github.com/user-attachments/assets/74f23f68-95d4-4026-a3fa-fb87bfdbcd3b)
+[![](https://github.com/user-attachments/assets/170481d7-2e3a-45ea-b53c-9a472f3eaa41)](https://github.com/user-attachments/assets/4f4e5101-8cf0-4f5b-b2e7-b46c93ce00fd)
 
 ## Особенности
-Поддерживаются следующие языки: английский, русский, китайский (упрощенный/традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
-
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)
 ![flag-china](https://github.com/user-attachments/assets/16848591-2baf-4300-893b-b95d5249a34e)
@@ -25,26 +23,17 @@
 ![flag-north-korea](https://github.com/user-attachments/assets/5b315a3d-6ce0-4cbb-b7a3-133ef2bcb2c5)
 ![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
 
-
-Для ввода IP адреса, на устройствах Android, нажмите `CTRL + ALT + BACKSPACE`.
-
-
-Если клавиатура Windows отличается от клавиатуры на мобильном устройстве, то нажмите `ALT + LANG` (смена раскладки на ПК).
-
-
-Второй язык определяется автоматически, при необходимости его можно сменить вручную нажав `CTRL + ALT + =`.
-
-
-Сменить чувствительность мыши `CTRL + ALT + \`.
-
-
-Вывести подсказку `CTRL + ALT + -`.
+- Поддерживаются следующие языки: английский, русский, китайский (упрощенный/традиционный), испанский, португальский (бразильский португальский), французкий, немецкий, японский, арабский, итальянский и корейский.
+- Для ввода IP адреса, на устройствах Android, нажмите кнопку настройки сверху `☰`.
+- Если клавиатура Windows отличается от клавиатуры на мобильном устройстве, то нажмите `ALT + LANG` (смена раскладки на ПК).
+- Второй язык определяется автоматически, при необходимости его можно сменить вручную нажав `CTRL + ALT + =`.
+- Сменить чувствительность мыши `CTRL + ALT + \`.
 
 ## Настройка
 ### Windows
 1. Проверьте брандмауэр Windows, разрешены ли входящие подключения у вашего типа сети (частной) и разрешите если отключены. 
 2. Зарезервируйте постоянный IP адрес компьютеру, с Windows приложением. Это делается в настройках Wi-Fi роутера, в разделе "DHCP".
-3. Распакуйте программу в `C:\Program Files\PCRemKey`.
+3. Распакуйте программу в `C:\Programs\PCRemKey`.
 4. Для автозапуска добавьте ярлык программы `PCRemKey.exe` в автозагрузку - Windows %AppData%\Microsoft\Windows\Start Menu\Programs\Startup.
 
 ### Android
@@ -55,7 +44,7 @@
 2. Нажмите кнопку `Поделиться` → `На экран Домой`. На рабочем столе появится ярлык для PCRemKey.
 
 ## Загрузка
->Версии для Android 7.1+, iOS 9+ и Windows XP+.
+>Версии для Android 9+, iOS 9+ и Windows XP+.
 
 **[Загрузить](https://github.com/r57zone/PCRemKey/releases)**
 

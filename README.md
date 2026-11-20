@@ -3,15 +3,13 @@
 ← Choose language | Выберите язык
 
 # PCRemKey
-Control your PC using a keyboard and a remote control for Android and iOS.
+Control your PC using an Android or iOS smartphone.
 
-[![](https://github.com/user-attachments/assets/9fd816b1-95a2-4009-b70d-84258a79ef62)](https://github.com/user-attachments/assets/262b032a-6fa1-488b-876c-33247900117d)
-[![](https://github.com/user-attachments/assets/2470ef79-9d7a-4382-b43f-24d6b4aec0ae)](https://github.com/user-attachments/assets/d16d3572-a600-4192-a406-362e4e22a69a)
-[![](https://github.com/user-attachments/assets/0933acf6-5beb-47b5-8e60-0e1cc7ace33c)](https://github.com/user-attachments/assets/a0bcb4fd-8b14-4918-89b5-ea611c18690b)
+[![](https://github.com/user-attachments/assets/ae24b10b-7b37-4df8-9033-9935230c140d)](https://github.com/user-attachments/assets/645d6c33-bbc9-4cd8-9085-48ecea2d13f8)
+[![](https://github.com/user-attachments/assets/09996b8c-8968-4085-9484-b6702e98e6ff)](https://github.com/user-attachments/assets/74f23f68-95d4-4026-a3fa-fb87bfdbcd3b)
+[![](https://github.com/user-attachments/assets/170481d7-2e3a-45ea-b53c-9a472f3eaa41)](https://github.com/user-attachments/assets/4f4e5101-8cf0-4f5b-b2e7-b46c93ce00fd)
 
 ## Features
-The following languages ​​are supported: English, Russian, Chinese (Simplified/Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
-
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
 ![flag-russia](https://user-images.githubusercontent.com/9499881/27683795-5b0fbac6-5cd8-11e7-929c-057833e01fb1.png)
 ![flag-china](https://github.com/user-attachments/assets/16848591-2baf-4300-893b-b95d5249a34e)
@@ -27,24 +25,17 @@ The following languages ​​are supported: English, Russian, Chinese (Simplifi
 ![flag-north-korea](https://github.com/user-attachments/assets/5b315a3d-6ce0-4cbb-b7a3-133ef2bcb2c5)
 ![flag-south-korea](https://github.com/user-attachments/assets/ed3d3778-9193-444a-85fd-ac5dd7bc91c6)
 
-
-To enter an IP address on a Android device, press `CTRL + ALT + BACKSPACE`.
-
-If the Windows keyboard layout differs from the mobile device keyboard, press `ALT + LANG` (change layout only on the PC).
-
-The second language is detected automatically; if needed, you can switch it manually by pressing `CTRL + ALT + =`.
-
-
-Change mouse sensitivity: `CTRL + ALT + \`.
-
-
-Show hint with `CTRL + ALT + -`.
+- The following languages ​​are supported: English, Russian, Chinese (Simplified/Traditional), Spanish, Portuguese (Brazilian Portuguese), French, German, Japanese, Arabic, Italian and Korean.
+- To enter an IP address on a Android device, press `CTRL + ALT + BACKSPACE`.
+- If the Windows keyboard layout differs from the mobile device keyboard, press `ALT + LANG` (change layout only on the PC).
+- The second language is detected automatically; if needed, you can switch it manually by pressing `CTRL + ALT + =`.
+- Change mouse sensitivity: `CTRL + ALT + \`.
 
 ## Setup
 ### Windows
 1. Check the Windows Firewall to ensure incoming connections are allowed for your network type (Private), and enable them if disabled.
 2. Reserve a static IP address for the computer running the Windows application. This is done in your Wi-Fi router settings under the "DHCP" section.
-3. Extract the program to `C:\Program Files\PCRemKey`.
+3. Extract the program to `C:\Programs\PCRemKey`.
 4. To enable autorun, add a shortcut to PCRemKey.exe in the Windows startup folder: `%AppData%\Microsoft\Windows\Start Menu\Programs\Startup`.
 
 ### Android
@@ -55,7 +46,7 @@ Install `PCRemKey.apk` and enter the reserved permanent IP of your computer.
 2. Click the `Share` button → `Add to Home Screen`. A shortcut to PCRemKey will appear on your desktop.
 
 ## Download
->Versions for Android 7.1+, iOS 9+ and Windows XP+. 
+>Versions for Android 9+, iOS 9+ and Windows XP+. 
 
 **[Download](https://github.com/r57zone/PCRemKey/releases)**
 
