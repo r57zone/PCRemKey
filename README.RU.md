@@ -5,7 +5,7 @@
 
 [![](https://github.com/user-attachments/assets/9a700d76-ddb8-4ffc-a642-54541c0857d6)](https://github.com/user-attachments/assets/16321821-726c-472d-b058-fe7cc488f5d0)
 [![](https://github.com/user-attachments/assets/09996b8c-8968-4085-9484-b6702e98e6ff)](https://github.com/user-attachments/assets/74f23f68-95d4-4026-a3fa-fb87bfdbcd3b)
-[![](https://github.com/user-attachments/assets/170481d7-2e3a-45ea-b53c-9a472f3eaa41)](https://github.com/user-attachments/assets/4f4e5101-8cf0-4f5b-b2e7-b46c93ce00fd)
+[![](https://github.com/user-attachments/assets/f795e179-4897-42e1-8289-7d6a40d1dc6e)](https://github.com/user-attachments/assets/4f4e5101-8cf0-4f5b-b2e7-b46c93ce00fd)
 
 ## Особенности
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)

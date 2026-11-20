@@ -7,7 +7,7 @@ Control your PC using an Android or iOS smartphone.
 
 [![](https://github.com/user-attachments/assets/ae24b10b-7b37-4df8-9033-9935230c140d)](https://github.com/user-attachments/assets/645d6c33-bbc9-4cd8-9085-48ecea2d13f8)
 [![](https://github.com/user-attachments/assets/09996b8c-8968-4085-9484-b6702e98e6ff)](https://github.com/user-attachments/assets/74f23f68-95d4-4026-a3fa-fb87bfdbcd3b)
-[![](https://github.com/user-attachments/assets/170481d7-2e3a-45ea-b53c-9a472f3eaa41)](https://github.com/user-attachments/assets/4f4e5101-8cf0-4f5b-b2e7-b46c93ce00fd)
+[![](https://github.com/user-attachments/assets/f795e179-4897-42e1-8289-7d6a40d1dc6e)](https://github.com/user-attachments/assets/4f4e5101-8cf0-4f5b-b2e7-b46c93ce00fd)
 
 ## Features
 ![flag-united-kingdom](https://github.com/user-attachments/assets/8c03c9b8-d154-466f-b9c4-6ea60278d537)
