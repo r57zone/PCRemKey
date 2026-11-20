@@ -48,5 +48,9 @@
 
 **[Загрузить](https://github.com/r57zone/PCRemKey/releases)**
 
+## Благодарности
+- [Claude AI](https://claude.ai) - за помощь в написании.
+- [ChatGPT](https://chatgpt.com) - за иконку.
+
 ## Обратная связь
 `r57zone@gmail.com`
